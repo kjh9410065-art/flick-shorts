@@ -137,6 +137,19 @@
             </div>
             <div class="subtitle-list" id="subtitleList"></div>
           </div>
+          <div class="voice-box" id="voiceBox">
+            <div class="voice-head"><b>4단계 · AI 음성</b><span id="voiceStatus">텍스트를 입력하세요</span></div>
+            <textarea id="voiceText" maxlength="1000" placeholder="예: 오늘 소개할 장소는 분위기가 정말 좋습니다."></textarea>
+            <div class="voice-options">
+              <div><label for="voiceLanguage">언어</label><select id="voiceLanguage"><option value="ko" selected>한국어</option><option value="en">English</option><option value="es">Español</option><option value="pt">Português</option><option value="fr">Français</option></select></div>
+              <div><label for="voiceSpeaker">목소리</label><select id="voiceSpeaker"><option value="F1" selected>여성 1 · 차분한 톤</option><option value="F2">여성 2 · 밝은 톤</option><option value="F3">여성 3 · 선명한 톤</option><option value="F4">여성 4 · 또렷한 톤</option><option value="F5">여성 5 · 부드러운 톤</option><option value="M1">남성 1 · 활기찬 톤</option><option value="M2">남성 2 · 낮은 톤</option><option value="M3">남성 3 · 방송 톤</option><option value="M4">남성 4 · 중립 톤</option><option value="M5">남성 5 · 따뜻한 톤</option></select></div>
+              <div><label for="voiceSpeed">말하기 속도</label><input id="voiceSpeed" type="range" min="0.8" max="1.2" step="0.05" value="1" /><output id="voiceSpeedValue">1.00x</output></div>
+              <div><label for="voiceMix">완성 영상 오디오</label><select id="voiceMix"><option value="voice" selected>AI 음성만</option><option value="music">AI 음성 + 배경음악</option><option value="original">AI 음성 + 원본 오디오</option></select></div>
+            </div>
+            <div class="voice-actions"><button id="generateVoiceBtn" class="secondary-btn">AI 음성 생성</button><button id="clearVoice" class="small-btn" hidden>음성 삭제</button></div>
+            <audio id="voicePreview" controls hidden></audio>
+            <p class="voice-note">음성은 브라우저에서 생성됩니다. 첫 생성 시 AI 음성 모델을 다운로드합니다.</p>
+          </div>
           <button id="renderBtn" class="primary-btn render-btn" disabled>쇼츠 만들기 <span>→</span></button>
           <div class="progress-wrap" id="progressWrap" hidden>
             <div class="progress-head"><span id="progressText">준비 중...</span><b id="progressPercent">0%</b></div>
@@ -166,13 +179,13 @@
       <div class="section-heading center">
         <span>DEVELOPMENT ROADMAP</span>
         <h2>기능을 단계별로 확장합니다.</h2>
-        <p>현재는 1단계 제작과 2단계 AI 자동 자막을 연결하는 중입니다.</p>
+        <p>1~4단계 기능을 하나의 브라우저 제작 흐름으로 연결합니다.</p>
       </div>
       <div class="roadmap">
         <article class="roadmap-item active"><div class="roadmap-number">1</div><div><span>구현</span><h3>영상 업로드 → 9:16 → 자동 컷 → 음악 → MP4</h3><p>브라우저에서 기본 쇼츠 제작과 MP4 출력을 처리합니다.</p></div></article>
         <article class="roadmap-item active"><div class="roadmap-number">2</div><div><span>현재 개발</span><h3>STT 자동 자막</h3><p>Whisper 기반 음성 인식으로 시간대가 있는 자막을 생성합니다.</p></div></article>
         <article class="roadmap-item"><div class="roadmap-number">3</div><div><span>다음</span><h3>비트 기반 자동 편집</h3><p>음악의 박자와 영상 구간을 맞춰 컷을 자동 배치합니다.</p></div></article>
-        <article class="roadmap-item"><div class="roadmap-number">4</div><div><span>예정</span><h3>AI 음성</h3><p>텍스트를 음성으로 만들고 영상에 자연스럽게 합성합니다.</p></div></article>
+        <article class="roadmap-item active"><div class="roadmap-number">4</div><div><span>구현</span><h3>AI 음성</h3><p>텍스트를 음성으로 만들고 원본 영상·배경음악과 합성합니다.</p></div></article>
         <article class="roadmap-item"><div class="roadmap-number">5</div><div><span>예정</span><h3>이미지 생성</h3><p>쇼츠에 필요한 이미지와 장면 소스를 생성합니다.</p></div></article>
         <article class="roadmap-item"><div class="roadmap-number">6</div><div><span>예정</span><h3>AI 영상 생성</h3><p>텍스트와 이미지에서 영상 장면까지 생성하는 단계입니다.</p></div></article>
       </div>
