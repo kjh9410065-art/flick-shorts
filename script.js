@@ -44,6 +44,17 @@ const generateVoiceBtn = document.getElementById("generateVoiceBtn");
 const clearVoice = document.getElementById("clearVoice");
 const voiceStatus = document.getElementById("voiceStatus");
 const voicePreview = document.getElementById("voicePreview");
+const imagePrompt = document.getElementById("imagePrompt");
+const imageModel = document.getElementById("imageModel");
+const imageSize = document.getElementById("imageSize");
+const imageApiKey = document.getElementById("imageApiKey");
+const saveImageKey = document.getElementById("saveImageKey");
+const generateImageBtn = document.getElementById("generateImageBtn");
+const clearImage = document.getElementById("clearImage");
+const imageStatus = document.getElementById("imageStatus");
+const imageResult = document.getElementById("imageResult");
+const generatedImage = document.getElementById("generatedImage");
+const downloadImageBtn = document.getElementById("downloadImageBtn");
 const stages = [...document.querySelectorAll(".stage")];
 
 const ffmpeg = new FFmpeg();
@@ -566,6 +577,95 @@ function addAudioFilter(args, audioFilter) {
   }
 }
 
+
+// 이미지 생성 API 키를 브라우저 로컬 저장소에서 불러옵니다.
+function loadImageApiKey() {
+  const key = localStorage.getItem("flickShortsImageApiKey") || "";
+  imageApiKey.value = key;
+}
+
+// 이미지 생성 API 키를 이 브라우저에만 저장합니다.
+function saveImageApiKey() {
+  const key = imageApiKey.value.trim();
+  if (!key) {
+    localStorage.removeItem("flickShortsImageApiKey");
+    imageStatus.textContent = "키 삭제됨";
+    return;
+  }
+  localStorage.setItem("flickShortsImageApiKey", key);
+  imageStatus.textContent = "키 저장됨";
+}
+
+// Pollinations 이미지 API로 쇼츠용 이미지를 생성합니다.
+async function generateImage() {
+  const prompt = imagePrompt.value.trim();
+  const key = imageApiKey.value.trim() || localStorage.getItem("flickShortsImageApiKey") || "";
+  if (!prompt) {
+    imageStatus.textContent = "프롬프트 필요";
+    setStatus("생성할 이미지의 설명을 입력해주세요.");
+    imagePrompt.focus();
+    return;
+  }
+  if (!key) {
+    imageStatus.textContent = "API 키 필요";
+    setStatus("이미지 생성 API 키를 입력해주세요.");
+    imageApiKey.focus();
+    return;
+  }
+
+  generateImageBtn.disabled = true;
+  clearImage.hidden = true;
+  imageStatus.textContent = "생성 중";
+  setProgress(15, "AI 이미지를 생성하는 중...");
+
+  try {
+    const [width, height] = imageSize.value.split("x").map(Number);
+    const url = "https://gen.pollinations.ai/image/" + encodeURIComponent(prompt) +
+      "?model=" + encodeURIComponent(imageModel.value) +
+      "&width=" + width + "&height=" + height +
+      "&nologo=true";
+
+    const response = await fetch(url, {
+      headers: { Authorization: "Bearer " + key }
+    });
+    if (!response.ok) throw new Error("image generation failed: " + response.status);
+
+    const blob = await response.blob();
+    const objectUrl = URL.createObjectURL(blob);
+    generatedImage.src = objectUrl;
+    generatedImage.dataset.objectUrl = objectUrl;
+    imageResult.hidden = false;
+    clearImage.hidden = false;
+    downloadImageBtn.href = objectUrl;
+    downloadImageBtn.download = "flick-shorts-ai-image.png";
+    downloadImageBtn.hidden = false;
+
+    imageStatus.textContent = "생성 완료";
+    setStage(5);
+    setProgress(100, "AI 이미지 생성 완료");
+    setStatus("AI 이미지가 생성되었습니다.");
+  } catch (error) {
+    console.error(error);
+    imageStatus.textContent = "실패";
+    setStatus("AI 이미지 생성에 실패했습니다. API 키와 서비스 한도를 확인해주세요.");
+    setProgress(0, "이미지 생성 실패");
+  } finally {
+    generateImageBtn.disabled = false;
+  }
+}
+
+// 현재 생성된 이미지를 제거합니다.
+function clearGeneratedImage() {
+  const oldUrl = generatedImage.dataset.objectUrl;
+  if (oldUrl) URL.revokeObjectURL(oldUrl);
+  generatedImage.removeAttribute("src");
+  generatedImage.dataset.objectUrl = "";
+  imageResult.hidden = true;
+  downloadImageBtn.hidden = true;
+  clearImage.hidden = true;
+  imageStatus.textContent = "준비됨";
+}
+
 // FFmpeg로 최종 쇼츠를 렌더링합니다.
 async function renderShorts() {
   if (!videoFile) return;
@@ -733,6 +833,13 @@ voiceSpeaker.addEventListener("change", () => {
   voiceStatus.textContent = "목소리 변경됨 · 다시 생성하세요";
 });
 voiceSpeed.addEventListener("change", clearGeneratedVoice);
+saveImageKey.addEventListener("click", saveImageApiKey);
+generateImageBtn.addEventListener("click", generateImage);
+clearImage.addEventListener("click", clearGeneratedImage);
+imagePrompt.addEventListener("input", () => {
+  if (imagePrompt.value.trim()) imageStatus.textContent = "생성 가능";
+});
+loadImageApiKey();
 renderBtn.addEventListener("click", renderShorts);
 beatEdit.addEventListener("change", () => {
   if (beatEdit.checked) setStatus("비트 기반 편집이 켜졌습니다. 배경음악이 없으면 영상 원본 오디오를 분석합니다.");
