@@ -66,6 +66,8 @@ const videoAiStatus = document.getElementById("videoAiStatus");
 const videoAiResult = document.getElementById("videoAiResult");
 const generatedAiVideo = document.getElementById("generatedAiVideo");
 const downloadAiVideoBtn = document.getElementById("downloadAiVideoBtn");
+const aiToolsToggle = document.getElementById("aiToolsToggle");
+const aiToolsContent = document.getElementById("aiToolsContent");
 const stages = [...document.querySelectorAll(".stage")];
 
 const ffmpeg = new FFmpeg();
@@ -959,6 +961,14 @@ imagePrompt.addEventListener("input", () => {
 });
 loadImageApiKey();
 loadVideoAiApiKey();
+if (aiToolsToggle && aiToolsContent) {
+  // AI 소재 생성 메뉴는 기본적으로 접어 두어 메인 쇼츠 제작 화면을 깔끔하게 유지합니다.
+  aiToolsToggle.addEventListener("click", () => {
+    const opened = aiToolsContent.classList.toggle("open");
+    aiToolsToggle.classList.toggle("open", opened);
+    aiToolsToggle.querySelector("span").textContent = opened ? "－" : "＋";
+  });
+}
 saveVideoAiKey.addEventListener("click", saveVideoAiApiKeyValue);
 generateVideoAiBtn.addEventListener("click", generateAiVideo);
 clearVideoAi.addEventListener("click", clearGeneratedAiVideo);
