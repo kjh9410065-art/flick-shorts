@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <meta name="description" content="FLiCK Shorts - 쉽고 빠르게 만드는 AI 쇼츠 제작 서비스" />
+  <meta name="description" content="FLiCK Shorts - 내 영상을 쇼츠로 자동 편집하는 브라우저 기반 제작기" />
   <title>FLiCK Shorts</title>
   <link rel="stylesheet" href="style.css" />
 </head>
@@ -15,97 +15,155 @@
       <span>FLiCK <b>Shorts</b></span>
     </a>
     <nav class="nav-links" aria-label="주요 메뉴">
+      <a href="#editor">제작</a>
       <a href="#features">기능</a>
-      <a href="#templates">템플릿</a>
       <a href="#how">사용방법</a>
     </nav>
-    <button class="nav-cta" data-scroll="#start">무료로 시작하기</button>
+    <button class="nav-cta" data-scroll="#editor">쇼츠 만들기</button>
   </header>
 
   <main id="top">
-    <!-- 히어로 영역 -->
+    <!-- 서비스 소개 -->
     <section class="hero">
       <div class="hero-copy">
-        <div class="eyebrow"><span></span> AI SHORTS CREATOR</div>
-        <h1>아이디어만 있으면<br /><strong>쇼츠가 완성됩니다.</strong></h1>
-        <p>대본부터 이미지, 자막까지.<br />복잡한 편집 없이 빠르게 나만의 쇼츠를 만들어보세요.</p>
+        <div class="eyebrow"><span></span> FLICK SHORTS</div>
+        <h1>내 영상을 넣으면<br /><strong>쇼츠로 바꿔드립니다.</strong></h1>
+        <p>영상을 업로드하고 길이와 스타일만 선택하세요.<br />브라우저에서 바로 9:16 쇼츠를 제작합니다.</p>
         <div class="hero-actions">
-          <button class="primary-btn" data-scroll="#start">쇼츠 만들기 <span>→</span></button>
-          <button class="ghost-btn" data-scroll="#how">어떻게 만들까요?</button>
+          <button class="primary-btn" data-scroll="#editor">쇼츠 만들기 <span>→</span></button>
+          <button class="ghost-btn" data-scroll="#how">사용방법</button>
         </div>
-        <div class="trust-row"><span>✓ 무료로 시작</span><span>✓ 설치 필요 없음</span><span>✓ 모바일 지원</span></div>
+        <div class="trust-row"><span>✓ 설치 필요 없음</span><span>✓ 내 브라우저에서 처리</span><span>✓ 9:16 출력</span></div>
       </div>
 
-      <!-- 실제 서비스 UI를 보여주는 휴대폰 목업 -->
-      <div class="hero-visual" aria-label="FLiCK Shorts 편집 화면 미리보기">
-        <div class="glow glow-one"></div>
-        <div class="glow glow-two"></div>
+      <!-- 실제 제작 화면을 보여주는 목업 -->
+      <div class="hero-visual">
         <div class="phone">
           <div class="phone-top"><span class="camera"></span></div>
           <div class="phone-screen">
             <div class="mini-header"><span class="mini-logo">F</span><span>새 쇼츠 만들기</span><span>•••</span></div>
-            <div class="preview-card">
-              <div class="preview-art">
-                <div class="sun"></div><div class="mountain mountain-a"></div><div class="mountain mountain-b"></div>
-                <span>오늘의 이야기</span>
-              </div>
-              <div class="caption-line"></div><div class="caption-line short"></div>
+            <div class="mock-video">
+              <div class="mock-play">▶</div>
+              <span>9 : 16</span>
             </div>
             <div class="tool-grid">
-              <div><span>✦</span> 대본</div><div><span>▣</span> 이미지</div>
-              <div><span>♫</span> 음악</div><div><span>T</span> 자막</div>
+              <div>▣ 영상</div><div>♫ 음악</div>
+              <div>⏱ 길이</div><div>T 자막</div>
             </div>
-            <button class="mini-create">영상 만들기</button>
+            <button class="mini-create" data-scroll="#editor">영상 만들기</button>
           </div>
         </div>
-        <div class="float-card card-script"><span>✦</span><div><b>AI 대본</b><small>10초 만에 완성</small></div></div>
-        <div class="float-card card-image"><span>▣</span><div><b>이미지 생성</b><small>장면에 맞춰 자동 생성</small></div></div>
-        <div class="float-card card-caption"><span>T</span><div><b>자동 자막</b><small>영상에 딱 맞게</small></div></div>
       </div>
     </section>
 
-    <!-- 기능 소개 -->
+    <!-- 실제 편집기 -->
+    <section class="editor-section" id="editor">
+      <div class="section-heading">
+        <span>SHORTS MAKER</span>
+        <h2>영상 하나로 바로 시작하세요.</h2>
+        <p>현재 버전은 기본 자동 편집부터 시작합니다. 영상 파일은 서버로 업로드하지 않고 브라우저에서 처리합니다.</p>
+      </div>
+
+      <div class="editor-card">
+        <div class="upload-panel">
+          <input id="videoInput" type="file" accept="video/*" hidden />
+          <label class="dropzone" id="dropzone" for="videoInput">
+            <div class="upload-icon">↑</div>
+            <strong>영상 파일을 끌어놓거나 클릭하세요</strong>
+            <span>MP4 · MOV · WebM 등 / 브라우저 처리</span>
+          </label>
+
+          <div class="file-info" id="fileInfo" hidden>
+            <div>
+              <b id="fileName">영상</b>
+              <span id="fileMeta">-</span>
+            </div>
+            <button id="removeVideo" class="small-btn">삭제</button>
+          </div>
+
+          <div class="controls">
+            <div class="control-group">
+              <label for="duration">쇼츠 길이</label>
+              <select id="duration">
+                <option value="15">15초</option>
+                <option value="30" selected>30초</option>
+                <option value="45">45초</option>
+                <option value="0">원본 길이</option>
+              </select>
+            </div>
+            <div class="control-group">
+              <label for="position">가로 영상 위치</label>
+              <select id="position">
+                <option value="center" selected>가운데</option>
+                <option value="left">왼쪽</option>
+                <option value="right">오른쪽</option>
+              </select>
+            </div>
+            <div class="control-group">
+              <label for="overlayText">화면 문구</label>
+              <input id="overlayText" type="text" maxlength="60" placeholder="예: 오늘의 추천 장소" />
+            </div>
+          </div>
+
+          <div class="audio-row">
+            <input id="audioInput" type="file" accept="audio/*" hidden />
+            <label class="audio-btn" for="audioInput">♫ 배경음악 추가</label>
+            <span id="audioName">선택하지 않음</span>
+            <button id="clearAudio" class="small-btn" hidden>삭제</button>
+          </div>
+
+          <button id="renderBtn" class="primary-btn render-btn" disabled>쇼츠 만들기 <span>→</span></button>
+          <div class="progress-wrap" id="progressWrap" hidden>
+            <div class="progress-head"><span id="progressText">준비 중...</span><b id="progressPercent">0%</b></div>
+            <div class="progress-bar"><i id="progressBar"></i></div>
+          </div>
+          <p class="notice" id="status">영상이 브라우저에만 보관됩니다. 첫 렌더링에는 FFmpeg 엔진 다운로드 시간이 필요할 수 있습니다.</p>
+        </div>
+
+        <div class="preview-panel">
+          <div class="preview-head"><b>미리보기</b><span id="previewRatio">9:16</span></div>
+          <div class="phone-preview">
+            <video id="previewVideo" controls playsinline></video>
+            <div class="preview-overlay" id="previewOverlay"></div>
+            <div class="empty-preview" id="emptyPreview">
+              <span>▶</span>
+              <b>영상을 업로드하세요</b>
+              <small>완성 결과도 이곳에서 확인할 수 있습니다.</small>
+            </div>
+          </div>
+          <a id="downloadBtn" class="download-btn" hidden>완성 영상 다운로드</a>
+        </div>
+      </div>
+    </section>
+
+    <!-- 기능 -->
     <section class="section" id="features">
-      <div class="section-heading"><span>WHY FLiCK</span><h2>복잡한 편집은 빼고,<br />만드는 재미만 남겼습니다.</h2></div>
+      <div class="section-heading"><span>ROADMAP</span><h2>처음부터 필요한 기능만 넣습니다.</h2></div>
       <div class="feature-grid">
-        <article class="feature-card"><div class="feature-icon purple">✦</div><h3>AI 대본</h3><p>주제만 입력하면 쇼츠에 맞는 대본을 빠르게 만들어줍니다.</p></article>
-        <article class="feature-card"><div class="feature-icon blue">▣</div><h3>이미지 & 장면</h3><p>대본의 흐름에 맞춰 필요한 장면을 구성할 수 있습니다.</p></article>
-        <article class="feature-card"><div class="feature-icon pink">T</div><h3>자동 자막</h3><p>쇼츠에 필요한 자막을 보기 좋게 배치합니다.</p></article>
-        <article class="feature-card"><div class="feature-icon cyan">♫</div><h3>음악</h3><p>영상 분위기에 어울리는 배경음악을 선택할 수 있습니다.</p></article>
-      </div>
-    </section>
-
-    <!-- 템플릿 -->
-    <section class="section templates" id="templates">
-      <div class="section-heading inline-heading"><div><span>SHORTS TEMPLATES</span><h2>원하는 스타일을 골라보세요.</h2></div><button class="text-btn">전체 보기 →</button></div>
-      <div class="template-grid">
-        <article class="template-card"><div class="template-art art-story"><span>STORY</span></div><div><b>스토리텔링</b><small>몰입감 있는 이야기</small></div></article>
-        <article class="template-card"><div class="template-art art-info"><span>FACT</span></div><div><b>정보 & 지식</b><small>깔끔한 정보 전달</small></div></article>
-        <article class="template-card"><div class="template-art art-vlog"><span>VLOG</span></div><div><b>일상 브이로그</b><small>감성적인 분위기</small></div></article>
-        <article class="template-card"><div class="template-art art-news"><span>NEWS</span></div><div><b>뉴스 스타일</b><small>빠르고 선명하게</small></div></article>
+        <article class="feature-card"><div class="feature-icon purple">▣</div><h3>영상 자동 세로화</h3><p>가로 영상을 쇼츠용 9:16 화면으로 자동 변환합니다.</p></article>
+        <article class="feature-card"><div class="feature-icon blue">⏱</div><h3>길이 자동 조절</h3><p>15초, 30초, 45초 등 원하는 길이로 잘라냅니다.</p></article>
+        <article class="feature-card"><div class="feature-icon pink">T</div><h3>문구 오버레이</h3><p>쇼츠 화면에 제목이나 강조 문구를 넣을 수 있습니다.</p></article>
+        <article class="feature-card"><div class="feature-icon cyan">♫</div><h3>배경음악</h3><p>사용자가 가진 음악을 영상에 합칠 수 있습니다.</p></article>
       </div>
     </section>
 
     <!-- 사용 방법 -->
     <section class="how-section" id="how">
-      <div class="section-heading center"><span>HOW IT WORKS</span><h2>딱 3단계면 충분합니다.</h2></div>
+      <div class="section-heading center"><span>HOW IT WORKS</span><h2>딱 3단계입니다.</h2></div>
       <div class="steps">
-        <div class="step"><i>01</i><h3>주제 입력</h3><p>만들고 싶은 쇼츠의 주제를 입력하세요.</p></div>
+        <div class="step"><i>01</i><h3>영상 업로드</h3><p>내 영상을 브라우저에 올립니다.</p></div>
         <div class="step-line"></div>
-        <div class="step"><i>02</i><h3>스타일 선택</h3><p>템플릿과 이미지, 음악을 원하는 대로 선택하세요.</p></div>
+        <div class="step"><i>02</i><h3>옵션 선택</h3><p>길이, 위치, 문구, 음악을 설정합니다.</p></div>
         <div class="step-line"></div>
-        <div class="step"><i>03</i><h3>쇼츠 완성</h3><p>완성된 영상을 확인하고 저장하세요.</p></div>
+        <div class="step"><i>03</i><h3>쇼츠 완성</h3><p>자동 렌더링 후 MP4를 저장합니다.</p></div>
       </div>
-    </section>
-
-    <!-- 시작 CTA -->
-    <section class="start-section" id="start">
-      <div><span>FLiCK SHORTS</span><h2>지금 첫 번째 쇼츠를<br /><strong>만들어보세요.</strong></h2><p>무료로 시작하고, 아이디어를 영상으로 바꿔보세요.</p></div>
-      <button class="primary-btn large" id="startBtn">무료로 시작하기 <span>→</span></button>
     </section>
   </main>
 
-  <footer><div class="brand"><span class="brand-mark">F</span><span>FLiCK <b>Shorts</b></span></div><p>© 2026 FLiCK. All rights reserved.</p></footer>
-  <script src="script.js"></script>
+  <footer>
+    <div class="brand"><span class="brand-mark">F</span><span>FLiCK <b>Shorts</b></span></div>
+    <p>© 2026 FLiCK. All rights reserved.</p>
+  </footer>
+  <script type="module" src="script.js"></script>
 </body>
 </html>
