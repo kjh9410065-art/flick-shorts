@@ -55,6 +55,17 @@ const imageStatus = document.getElementById("imageStatus");
 const imageResult = document.getElementById("imageResult");
 const generatedImage = document.getElementById("generatedImage");
 const downloadImageBtn = document.getElementById("downloadImageBtn");
+const videoAiPrompt = document.getElementById("videoAiPrompt");
+const videoAiModel = document.getElementById("videoAiModel");
+const videoAiDuration = document.getElementById("videoAiDuration");
+const videoAiApiKey = document.getElementById("videoAiApiKey");
+const saveVideoAiKey = document.getElementById("saveVideoAiKey");
+const generateVideoAiBtn = document.getElementById("generateVideoAiBtn");
+const clearVideoAi = document.getElementById("clearVideoAi");
+const videoAiStatus = document.getElementById("videoAiStatus");
+const videoAiResult = document.getElementById("videoAiResult");
+const generatedAiVideo = document.getElementById("generatedAiVideo");
+const downloadAiVideoBtn = document.getElementById("downloadAiVideoBtn");
 const stages = [...document.querySelectorAll(".stage")];
 
 const ffmpeg = new FFmpeg();
@@ -666,6 +677,113 @@ function clearGeneratedImage() {
   imageStatus.textContent = "준비됨";
 }
 
+
+// AI 영상 API 키를 브라우저 로컬 저장소에서 불러옵니다.
+function loadVideoAiApiKey() {
+  videoAiApiKey.value = localStorage.getItem("flickShortsVideoAiApiKey") || "";
+}
+
+// AI 영상 API 키를 이 브라우저에만 저장합니다.
+function saveVideoAiApiKeyValue() {
+  const key = videoAiApiKey.value.trim();
+  if (key) localStorage.setItem("flickShortsVideoAiApiKey", key);
+  else localStorage.removeItem("flickShortsVideoAiApiKey");
+  videoAiStatus.textContent = key ? "키 저장됨" : "키 삭제됨";
+}
+
+// Luma Dream Machine 호환 REST API로 영상 생성 작업을 시작합니다.
+async function generateAiVideo() {
+  const prompt = videoAiPrompt.value.trim();
+  const key = videoAiApiKey.value.trim() || localStorage.getItem("flickShortsVideoAiApiKey") || "";
+  if (!prompt) {
+    videoAiStatus.textContent = "프롬프트 필요";
+    setStatus("AI 영상으로 만들 장면을 입력해주세요.");
+    videoAiPrompt.focus();
+    return;
+  }
+  if (!key) {
+    videoAiStatus.textContent = "API 키 필요";
+    setStatus("AI 영상 API 키를 입력해주세요.");
+    videoAiApiKey.focus();
+    return;
+  }
+
+  generateVideoAiBtn.disabled = true;
+  clearVideoAi.hidden = true;
+  videoAiStatus.textContent = "생성 요청 중";
+  setProgress(10, "AI 영상 생성을 요청하는 중...");
+
+  try {
+    // Luma API의 text-to-video 요청을 생성합니다.
+    const createResponse = await fetch("https://api.lumalabs.ai/dream-machine/v1/generations", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        "Authorization": "Bearer " + key
+      },
+      body: JSON.stringify({
+        prompt,
+        model: videoAiModel.value === "wan" ? "ray-2" : "ray-2",
+        aspect_ratio: "9:16",
+        duration: videoAiDuration.value
+      })
+    });
+
+    if (!createResponse.ok) throw new Error("video generation request failed: " + createResponse.status);
+    const created = await createResponse.json();
+    const generationId = created.id;
+    if (!generationId) throw new Error("generation id missing");
+
+    // 생성 완료까지 일정 간격으로 상태를 확인합니다.
+    let result = created;
+    for (let attempt = 0; attempt < 60; attempt++) {
+      if (result.state === "completed" || result.status === "completed") break;
+      if (result.state === "failed" || result.status === "failed") throw new Error("generation failed");
+      await new Promise((resolve) => setTimeout(resolve, 5000));
+      const pollResponse = await fetch("https://api.lumalabs.ai/dream-machine/v1/generations/" + encodeURIComponent(generationId), {
+        headers: { "Authorization": "Bearer " + key }
+      });
+      if (!pollResponse.ok) throw new Error("generation polling failed: " + pollResponse.status);
+      result = await pollResponse.json();
+      setProgress(10 + Math.min(80, (attempt + 1) * 1.4), "AI 영상 생성 중...");
+    }
+
+    const videoUrl = result.assets?.video;
+    if (!videoUrl) throw new Error("video url missing");
+
+    generatedAiVideo.src = videoUrl;
+    generatedAiVideo.load();
+    videoAiResult.hidden = false;
+    clearVideoAi.hidden = false;
+    downloadAiVideoBtn.href = videoUrl;
+    downloadAiVideoBtn.download = "flick-shorts-ai-video.mp4";
+    downloadAiVideoBtn.hidden = false;
+
+    videoAiStatus.textContent = "생성 완료";
+    setStage(6);
+    setProgress(100, "AI 영상 생성 완료");
+    setStatus("AI 영상이 생성되었습니다.");
+  } catch (error) {
+    console.error(error);
+    videoAiStatus.textContent = "실패";
+    setStatus("AI 영상 생성에 실패했습니다. API 키, 모델 사용 권한, API 한도를 확인해주세요.");
+    setProgress(0, "AI 영상 생성 실패");
+  } finally {
+    generateVideoAiBtn.disabled = false;
+  }
+}
+
+// 생성된 AI 영상을 제거합니다.
+function clearGeneratedAiVideo() {
+  generatedAiVideo.pause();
+  generatedAiVideo.removeAttribute("src");
+  generatedAiVideo.load();
+  videoAiResult.hidden = true;
+  downloadAiVideoBtn.hidden = true;
+  clearVideoAi.hidden = true;
+  videoAiStatus.textContent = "준비됨";
+}
+
 // FFmpeg로 최종 쇼츠를 렌더링합니다.
 async function renderShorts() {
   if (!videoFile) return;
@@ -840,6 +958,10 @@ imagePrompt.addEventListener("input", () => {
   if (imagePrompt.value.trim()) imageStatus.textContent = "생성 가능";
 });
 loadImageApiKey();
+loadVideoAiApiKey();
+saveVideoAiKey.addEventListener("click", saveVideoAiApiKeyValue);
+generateVideoAiBtn.addEventListener("click", generateAiVideo);
+clearVideoAi.addEventListener("click", clearGeneratedAiVideo);
 renderBtn.addEventListener("click", renderShorts);
 beatEdit.addEventListener("change", () => {
   if (beatEdit.checked) setStatus("비트 기반 편집이 켜졌습니다. 배경음악이 없으면 영상 원본 오디오를 분석합니다.");
