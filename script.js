@@ -664,9 +664,9 @@ async function renderShorts() {
         args.push("-map", getVideoMap(args), "-map", "[aout]", "-c:a", "aac", "-b:a", "192k");
       }
     } else if (audioFile) {
-      args.push("-stream_loop", "-1", "-i", "music", "-map", "0:v:0", "-map", "1:a:0", "-c:a", "aac", "-b:a", "192k");
+      args.push("-stream_loop", "-1", "-i", "music", "-map", getVideoMap(args), "-map", "1:a:0", "-c:a", "aac", "-b:a", "192k");
     } else {
-      args.push("-map", "0:v:0", "-map", "0:a:0?", "-c:a", "aac", "-b:a", "128k");
+      args.push("-map", getVideoMap(args), "-map", "0:a:0?", "-c:a", "aac", "-b:a", "128k");
     }
 
     if (targetDuration > 0) args.push("-t", String(targetDuration));
