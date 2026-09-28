@@ -181,3 +181,8 @@ footer { max-width:1180px; margin:auto; padding:28px 24px 45px; display:flex; ju
 .extra-page-card .image-box,.extra-page-card .video-ai-box{margin-top:14px}
 .extra-page-card .ai-tools-toggle{display:none}
 @media(max-width:560px){.app-tab{min-width:0;flex:1;padding:10px 12px}.app-tabs{padding:8px 10px}.extra-page{padding:38px 14px 60px}}
+/* 첫 진입은 랜딩 화면만 보여주고 제작 버튼으로 편집 화면을 엽니다. */
+.navbar{opacity:0;pointer-events:none;transition:opacity .2s ease}
+.navbar.visible{opacity:1;pointer-events:auto}
+.hero{min-height:100vh;box-sizing:border-box}
+.editor-section[hidden],.roadmap-section[hidden]{display:none!important}
