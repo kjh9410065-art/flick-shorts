@@ -1024,9 +1024,41 @@ removeVideo.addEventListener("click", () => {
 });
 
 // 상단 버튼을 편집기로 부드럽게 이동합니다.
+function openEditor(targetSelector) {
+  const editor = document.querySelector("#editor");
+  const roadmap = document.querySelector("#roadmap");
+  const nav = document.querySelector("#siteNav");
+  if (!editor) return;
+  editor.hidden = false;
+  if (roadmap) roadmap.hidden = false;
+  if (nav) nav.classList.add("visible");
+  document.body.classList.add("editor-open");
+  const target = document.querySelector(targetSelector || "#editor") || editor;
+  requestAnimationFrame(() => target.scrollIntoView({ behavior: "smooth", block: "start" }));
+}
+
 document.querySelectorAll("[data-scroll]").forEach((button) => {
   button.addEventListener("click", () => {
-    const target = document.querySelector(button.dataset.scroll);
+    const selector = button.dataset.scroll;
+    if (selector === "#editor" || selector === "#roadmap") {
+      openEditor(selector);
+      return;
+    }
+    const target = document.querySelector(selector);
     if (target) target.scrollIntoView({ behavior: "smooth" });
+  });
+});
+
+const brandButton = document.querySelector(".brand");
+if (brandButton) {
+  brandButton.addEventListener("click", (event) => {
+    event.preventDefault();
+    document.querySelector("#editor").hidden = true;
+    document.querySelector("#roadmap").hidden = true;
+    document.querySelector("#siteNav").classList.remove("visible");
+    document.body.classList.remove("editor-open");
+    window.scrollTo({ top: 0, behavior: "smooth" });
+  });
+}
   });
 });
