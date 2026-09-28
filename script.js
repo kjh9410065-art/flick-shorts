@@ -556,6 +556,16 @@ function getVideoMap(args) {
   return "0:v:0";
 }
 
+// 기존 filter_complex가 있으면 오디오 필터를 같은 그래프에 이어 붙입니다.
+function addAudioFilter(args, audioFilter) {
+  const index = args.indexOf("-filter_complex");
+  if (index >= 0) {
+    args[index + 1] = args[index + 1] + ";" + audioFilter;
+  } else {
+    args.push("-filter_complex", audioFilter);
+  }
+}
+
 // FFmpeg로 최종 쇼츠를 렌더링합니다.
 async function renderShorts() {
   if (!videoFile) return;
@@ -637,19 +647,19 @@ async function renderShorts() {
       if (audioFile) {
         args.push("-stream_loop", "-1", "-i", "music", "-i", "voice.wav");
         if (voiceMix.value === "music") {
-          args.push("-filter_complex", "[1:a]volume=0.35[musicv];[musicv][2:a]amix=inputs=2:duration=longest:dropout_transition=2[aout]");
+          addAudioFilter(args, "[1:a]volume=0.35[musicv];[musicv][2:a]amix=inputs=2:duration=longest:dropout_transition=2[aout]");
         } else if (voiceMix.value === "original") {
-          args.push("-filter_complex", "[0:a]volume=0.25[originalv];[originalv][2:a]amix=inputs=2:duration=longest:dropout_transition=2[aout]");
+          addAudioFilter(args, "[0:a]volume=0.25[originalv];[originalv][2:a]amix=inputs=2:duration=longest:dropout_transition=2[aout]");
         } else {
-          args.push("-filter_complex", "[2:a]apad[aout]");
+          addAudioFilter(args, "[2:a]apad[aout]");
         }
         args.push("-map", getVideoMap(args), "-map", "[aout]", "-c:a", "aac", "-b:a", "192k");
       } else {
         args.push("-i", "voice.wav");
         if (voiceMix.value === "original") {
-          args.push("-filter_complex", "[0:a]volume=0.25[originalv];[originalv][1:a]amix=inputs=2:duration=longest:dropout_transition=2[aout]");
+          addAudioFilter(args, "[0:a]volume=0.25[originalv];[originalv][1:a]amix=inputs=2:duration=longest:dropout_transition=2[aout]");
         } else {
-          args.push("-filter_complex", "[1:a]apad[aout]");
+          addAudioFilter(args, "[1:a]apad[aout]");
         }
         args.push("-map", getVideoMap(args), "-map", "[aout]", "-c:a", "aac", "-b:a", "192k");
       }
