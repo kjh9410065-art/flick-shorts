@@ -34,6 +34,16 @@ const subtitleBox = document.getElementById("subtitleBox");
 const subtitleStatus = document.getElementById("subtitleStatus");
 const subtitleLanguage = document.getElementById("subtitleLanguage");
 const subtitleList = document.getElementById("subtitleList");
+const voiceText = document.getElementById("voiceText");
+const voiceLanguage = document.getElementById("voiceLanguage");
+const voiceSpeaker = document.getElementById("voiceSpeaker");
+const voiceSpeed = document.getElementById("voiceSpeed");
+const voiceSpeedValue = document.getElementById("voiceSpeedValue");
+const voiceMix = document.getElementById("voiceMix");
+const generateVoiceBtn = document.getElementById("generateVoiceBtn");
+const clearVoice = document.getElementById("clearVoice");
+const voiceStatus = document.getElementById("voiceStatus");
+const voicePreview = document.getElementById("voicePreview");
 const stages = [...document.querySelectorAll(".stage")];
 
 const ffmpeg = new FFmpeg();
@@ -48,6 +58,10 @@ let transcriber = null;
 let subtitleSegments = [];
 let subtitleFontLoaded = false;
 let beatCuts = [];
+let ttsSynthesizer = null;
+let ttsModelLoaded = false;
+let voiceBlob = null;
+let voiceObjectUrl = null;
 
 // 화면에 상태 메시지를 표시합니다.
 function setStatus(message) {
@@ -306,6 +320,110 @@ function buildSubtitleFilters() {
   }).join(",");
 }
 
+
+// Supertonic TTS 모델을 브라우저에서 최초 한 번만 로드합니다.
+async function loadTTS() {
+  if (ttsSynthesizer) return ttsSynthesizer;
+  setProgress(8, "AI 음성 모델을 불러오는 중...");
+  const { pipeline } = await import("https://cdn.jsdelivr.net/npm/@huggingface/transformers@3.8.1");
+  ttsSynthesizer = await pipeline("text-to-speech", "onnx-community/Supertonic-TTS-2-ONNX");
+  ttsModelLoaded = true;
+  return ttsSynthesizer;
+}
+
+// 입력 언어를 Supertonic이 요구하는 언어 태그로 감쌉니다.
+function wrapTTSLanguage(text, language) {
+  return "<" + language + ">" + text.replace(/\s+/g, " ").trim() + "</" + language + ">";
+}
+
+// AI 음성을 생성하고 미리보기 오디오를 준비합니다.
+async function generateVoice() {
+  const text = voiceText.value.replace(/\s+/g, " ").trim();
+  if (!text) {
+    voiceStatus.textContent = "텍스트 필요";
+    setStatus("AI 음성으로 만들 문장을 입력해주세요.");
+    voiceText.focus();
+    return;
+  }
+
+  generateVoiceBtn.disabled = true;
+  clearVoice.hidden = true;
+  voiceStatus.textContent = "생성 중";
+  setStatus("AI 음성을 생성하는 중입니다. 첫 생성은 모델 다운로드가 필요합니다.");
+
+  try {
+    const synthesizer = await loadTTS();
+    setProgress(25, "AI가 음성을 합성하는 중...");
+    const output = await synthesizer(wrapTTSLanguage(text, voiceLanguage.value), {
+      speaker_embeddings: "https://huggingface.co/onnx-community/Supertonic-TTS-2-ONNX/resolve/main/voices/" + voiceSpeaker.value + ".bin",
+      num_inference_steps: 5,
+      speed: Number(voiceSpeed.value)
+    });
+
+    voiceBlob = typeof output.toBlob === "function"
+      ? output.toBlob()
+      : new Blob([createWavBuffer(output.audio, output.sampling_rate)], { type: "audio/wav" });
+
+    if (voiceObjectUrl) URL.revokeObjectURL(voiceObjectUrl);
+    voiceObjectUrl = URL.createObjectURL(voiceBlob);
+    voicePreview.src = voiceObjectUrl;
+    voicePreview.hidden = false;
+    clearVoice.hidden = false;
+    voiceStatus.textContent = "생성 완료";
+    setStage(4);
+    setProgress(100, "AI 음성 생성 완료");
+    setStatus("AI 음성이 생성되었습니다. 미리 들어보고 쇼츠 만들기를 누르세요.");
+  } catch (error) {
+    console.error(error);
+    voiceBlob = null;
+    voiceStatus.textContent = "실패";
+    setStatus("AI 음성 생성에 실패했습니다. 브라우저 메모리와 네트워크 상태를 확인해주세요.");
+    setProgress(0, "AI 음성 생성 실패");
+  } finally {
+    generateVoiceBtn.disabled = false;
+  }
+}
+
+// Raw Float32 오디오를 WAV 파일로 변환합니다.
+function createWavBuffer(samples, sampleRate) {
+  const data = samples instanceof Float32Array ? samples : new Float32Array(samples);
+  const buffer = new ArrayBuffer(44 + data.length * 2);
+  const view = new DataView(buffer);
+  const writeString = (offset, value) => {
+    for (let i = 0; i < value.length; i++) view.setUint8(offset + i, value.charCodeAt(i));
+  };
+  writeString(0, "RIFF");
+  view.setUint32(4, 36 + data.length * 2, true);
+  writeString(8, "WAVE");
+  writeString(12, "fmt ");
+  view.setUint32(16, 16, true);
+  view.setUint16(20, 1, true);
+  view.setUint16(22, 1, true);
+  view.setUint32(24, sampleRate, true);
+  view.setUint32(28, sampleRate * 2, true);
+  view.setUint16(32, 2, true);
+  view.setUint16(34, 16, true);
+  writeString(36, "data");
+  view.setUint32(40, data.length * 2, true);
+  for (let i = 0; i < data.length; i++) {
+    const sample = Math.max(-1, Math.min(1, data[i]));
+    view.setInt16(44 + i * 2, sample < 0 ? sample * 0x8000 : sample * 0x7fff, true);
+  }
+  return buffer;
+}
+
+// 생성된 AI 음성을 제거합니다.
+function clearGeneratedVoice() {
+  voiceBlob = null;
+  if (voiceObjectUrl) URL.revokeObjectURL(voiceObjectUrl);
+  voiceObjectUrl = null;
+  voicePreview.removeAttribute("src");
+  voicePreview.load();
+  voicePreview.hidden = true;
+  clearVoice.hidden = true;
+  voiceStatus.textContent = "텍스트를 입력하세요";
+}
+
 // 오디오의 에너지 피크를 찾아 비트 후보를 계산합니다.
 async function detectBeats(file) {
   setProgress(12, "음악의 박자를 분석하는 중...");
@@ -425,12 +543,26 @@ function buildBeatFilterComplex(segments, videoFilter) {
   return parts.join(";");
 }
 
+
+// 현재 필터 구성에 맞는 비디오 출력 라벨을 찾습니다.
+function getVideoMap(args) {
+  const index = args.indexOf("-filter_complex");
+  if (index >= 0) {
+    const filter = args[index + 1] || "";
+    if (filter.includes("[finalv]")) return "[finalv]";
+    if (filter.includes("[captionv]")) return "[captionv]";
+    if (filter.includes("[beatv]")) return "[beatv]";
+  }
+  return "0:v:0";
+}
+
 // FFmpeg로 최종 쇼츠를 렌더링합니다.
 async function renderShorts() {
   if (!videoFile) return;
 
   renderBtn.disabled = true;
   transcribeBtn.disabled = true;
+  generateVoiceBtn.disabled = true;
   downloadBtn.hidden = true;
   setStatus("렌더링을 시작합니다.");
 
@@ -438,7 +570,7 @@ async function renderShorts() {
     await loadFFmpeg();
     attachProgressListener();
 
-    for (const name of ["input.mp4", "music", "output.mp4", "NotoSansKR-Regular.otf"]) {
+    for (const name of ["input.mp4", "music", "voice.wav", "output.mp4", "NotoSansKR-Regular.otf"]) {
       if (name === "NotoSansKR-Regular.otf" && subtitleFontLoaded) continue;
       try { await ffmpeg.deleteFile(name); } catch {}
     }
@@ -461,6 +593,10 @@ async function renderShorts() {
     const cutStart = getCutStart();
     const text = overlayText.value.trim();
     const baseFilter = buildCropFilter();
+    if (voiceBlob) {
+      setProgress(18, "AI 음성 파일을 준비하는 중...");
+      await ffmpeg.writeFile("voice.wav", new Uint8Array(await voiceBlob.arrayBuffer()));
+    }
 
     // 비트 편집은 먼저 영상 조각을 이어 붙인 뒤 자막과 문구를 적용합니다.
     let args;
@@ -496,7 +632,28 @@ async function renderShorts() {
       args = ["-ss", String(cutStart), "-i", "input.mp4", "-vf", filters.filter(Boolean).join(","), "-c:v", "libx264", "-preset", "veryfast", "-pix_fmt", "yuv420p"];
     }
 
-    if (audioFile) {
+    // AI 음성이 있으면 음성·배경음악·원본 오디오 중 선택한 소스를 합성합니다.
+    if (voiceBlob) {
+      if (audioFile) {
+        args.push("-stream_loop", "-1", "-i", "music", "-i", "voice.wav");
+        if (voiceMix.value === "music") {
+          args.push("-filter_complex", "[1:a]volume=0.35[musicv];[musicv][2:a]amix=inputs=2:duration=longest:dropout_transition=2[aout]");
+        } else if (voiceMix.value === "original") {
+          args.push("-filter_complex", "[0:a]volume=0.25[originalv];[originalv][2:a]amix=inputs=2:duration=longest:dropout_transition=2[aout]");
+        } else {
+          args.push("-filter_complex", "[2:a]apad[aout]");
+        }
+        args.push("-map", getVideoMap(args), "-map", "[aout]", "-c:a", "aac", "-b:a", "192k");
+      } else {
+        args.push("-i", "voice.wav");
+        if (voiceMix.value === "original") {
+          args.push("-filter_complex", "[0:a]volume=0.25[originalv];[originalv][1:a]amix=inputs=2:duration=longest:dropout_transition=2[aout]");
+        } else {
+          args.push("-filter_complex", "[1:a]apad[aout]");
+        }
+        args.push("-map", getVideoMap(args), "-map", "[aout]", "-c:a", "aac", "-b:a", "192k");
+      }
+    } else if (audioFile) {
       args.push("-stream_loop", "-1", "-i", "music", "-map", "0:v:0", "-map", "1:a:0", "-c:a", "aac", "-b:a", "192k");
     } else {
       args.push("-map", "0:v:0", "-map", "0:a:0?", "-c:a", "aac", "-b:a", "128k");
@@ -528,6 +685,7 @@ async function renderShorts() {
   } finally {
     renderBtn.disabled = !videoFile;
     transcribeBtn.disabled = !videoFile;
+    generateVoiceBtn.disabled = false;
   }
 }
 
@@ -548,6 +706,23 @@ videoInput.addEventListener("change", () => setVideo(videoInput.files[0]));
 audioInput.addEventListener("change", () => setAudio(audioInput.files[0]));
 overlayText.addEventListener("input", updateOverlay);
 transcribeBtn.addEventListener("click", generateSubtitles);
+generateVoiceBtn.addEventListener("click", generateVoice);
+clearVoice.addEventListener("click", clearGeneratedVoice);
+voiceText.addEventListener("input", () => {
+  voiceStatus.textContent = voiceText.value.trim() ? "생성 가능" : "텍스트를 입력하세요";
+});
+voiceSpeed.addEventListener("input", () => {
+  voiceSpeedValue.textContent = Number(voiceSpeed.value).toFixed(2) + "x";
+});
+voiceLanguage.addEventListener("change", () => {
+  clearGeneratedVoice();
+  voiceStatus.textContent = "언어 변경됨 · 다시 생성하세요";
+});
+voiceSpeaker.addEventListener("change", () => {
+  clearGeneratedVoice();
+  voiceStatus.textContent = "목소리 변경됨 · 다시 생성하세요";
+});
+voiceSpeed.addEventListener("change", clearGeneratedVoice);
 renderBtn.addEventListener("click", renderShorts);
 beatEdit.addEventListener("change", () => {
   if (beatEdit.checked) setStatus("비트 기반 편집이 켜졌습니다. 배경음악이 없으면 영상 원본 오디오를 분석합니다.");
@@ -565,7 +740,7 @@ function setAudio(file) {
   clearAudio.hidden = false;
   setStatus("배경음악이 선택되었습니다.");
 }
-audioInput.addEventListener("change", () => setAudio(audioInput.files[0]));
+
 
 clearAudio.addEventListener("click", () => {
   audioFile = null;
@@ -581,6 +756,7 @@ removeVideo.addEventListener("click", () => {
   sourceDuration = 0;
   subtitleSegments = [];
   beatCuts = [];
+  clearGeneratedVoice();
   videoInput.value = "";
   audioInput.value = "";
   fileInfo.hidden = true;
