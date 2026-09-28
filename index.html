@@ -171,6 +171,27 @@
             </div>
             <p class="image-note">API 키는 이 브라우저의 로컬 저장소에만 저장합니다. 생성 비용과 한도는 연결한 API 서비스 정책을 따릅니다.</p>
           </div>
+          <div class="video-ai-box" id="videoAiBox">
+            <div class="video-ai-head"><b>6단계 · AI 영상 생성</b><span id="videoAiStatus">준비됨</span></div>
+            <textarea id="videoAiPrompt" maxlength="1000" placeholder="예: 비 오는 밤의 서울 골목을 천천히 걷는 장면, 네온사인, 시네마틱, 세로 영상"></textarea>
+            <div class="video-ai-options">
+              <div><label for="videoAiModel">모델</label><select id="videoAiModel"><option value="wan">Wan 2.1</option><option value="ltx">LTX-Video</option></select></div>
+              <div><label for="videoAiDuration">길이</label><select id="videoAiDuration"><option value="3" selected>3초</option><option value="5">5초</option><option value="8">8초</option></select></div>
+            </div>
+            <div class="video-ai-key-row">
+              <input id="videoAiApiKey" type="password" autocomplete="off" placeholder="영상 API 키 입력" />
+              <button id="saveVideoAiKey" class="small-btn">키 저장</button>
+            </div>
+            <div class="video-ai-actions">
+              <button id="generateVideoAiBtn" class="secondary-btn">AI 영상 생성</button>
+              <button id="clearVideoAi" class="small-btn" hidden>삭제</button>
+            </div>
+            <div class="video-ai-result" id="videoAiResult" hidden>
+              <video id="generatedAiVideo" controls playsinline></video>
+              <a id="downloadAiVideoBtn" class="download-btn" hidden>AI 영상 다운로드</a>
+            </div>
+            <p class="video-ai-note">생성 API를 연결해 텍스트에서 짧은 영상 장면을 만듭니다. 생성 비용과 처리 시간은 API 서비스에 따라 달라집니다.</p>
+          </div>
           <button id="renderBtn" class="primary-btn render-btn" disabled>쇼츠 만들기 <span>→</span></button>
           <div class="progress-wrap" id="progressWrap" hidden>
             <div class="progress-head"><span id="progressText">준비 중...</span><b id="progressPercent">0%</b></div>
@@ -208,7 +229,7 @@
         <article class="roadmap-item"><div class="roadmap-number">3</div><div><span>다음</span><h3>비트 기반 자동 편집</h3><p>음악의 박자와 영상 구간을 맞춰 컷을 자동 배치합니다.</p></div></article>
         <article class="roadmap-item active"><div class="roadmap-number">4</div><div><span>구현</span><h3>AI 음성</h3><p>텍스트를 음성으로 만들고 원본 영상·배경음악과 합성합니다.</p></div></article>
         <article class="roadmap-item active"><div class="roadmap-number">5</div><div><span>구현</span><h3>AI 이미지 생성</h3><p>프롬프트로 쇼츠용 세로 이미지와 장면 소스를 생성합니다.</p></div></article>
-        <article class="roadmap-item"><div class="roadmap-number">6</div><div><span>예정</span><h3>AI 영상 생성</h3><p>텍스트와 이미지에서 영상 장면까지 생성하는 단계입니다.</p></div></article>
+        <article class="roadmap-item active"><div class="roadmap-number">6</div><div><span>구현</span><h3>AI 영상 생성</h3><p>프롬프트로 짧은 영상 장면을 생성하고 결과를 다운로드합니다.</p></div></article>
       </div>
     </section>
 
