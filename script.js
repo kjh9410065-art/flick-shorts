@@ -187,7 +187,7 @@ function escapeDrawText(text) {
 
 // 자막에 사용할 한 줄 길이를 제한합니다.
 function wrapSubtitleText(text, maxChars = 24) {
-  const clean = text.replace(/\\s+/g, " ").trim();
+  const clean = text.replace(/\s+/g, " ").trim();
   if (clean.length <= maxChars) return clean;
   const parts = [];
   for (let i = 0; i < clean.length; i += maxChars) {
