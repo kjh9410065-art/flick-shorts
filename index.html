@@ -150,13 +150,7 @@
             <audio id="voicePreview" controls hidden></audio>
             <p class="voice-note">음성은 브라우저에서 생성됩니다. 첫 생성 시 AI 음성 모델을 다운로드합니다.</p>
           </div>
-          <div class="image-box" id="imageBox">
-            <div class="image-head"><b>5단계 · AI 이미지 생성</b><span id="imageStatus">준비됨</span></div>
-            <textarea id="imagePrompt" maxlength="1000" placeholder="예: 밤의 서울 골목, 네온사인, 시네마틱 조명, 세로 쇼츠용"></textarea>
-            <div class="image-options">
-              <div><label for="imageModel">모델</label><select id="imageModel"><option value="flux" selected>FLUX</option><option value="turbo">Turbo</option></select></div>
-              <div><label for="imageSize">비율</label><select id="imageSize"><option value="1080x1920" selected>9:16 세로</option><option value="1024x1024">1:1 정사각형</option><option value="1920x1080">16:9 가로</option></select></div>
-            </div>
+
             <div class="image-key-row">
               <input id="imageApiKey" type="password" autocomplete="off" placeholder="이미지 API 키 입력 (브라우저에만 저장)" />
               <button id="saveImageKey" class="small-btn">키 저장</button>
@@ -172,6 +166,13 @@
             <p class="image-note">API 키는 이 브라우저의 로컬 저장소에만 저장합니다. 생성 비용과 한도는 연결한 API 서비스 정책을 따릅니다.</p>
           </div>
           <div class="ai-tools-menu" id="aiToolsMenu"><button type="button" id="aiToolsToggle" class="ai-tools-toggle">AI 소재 생성 <span>＋</span></button><div class="ai-tools-content" id="aiToolsContent"><div class="ai-tools-title">쇼츠 제작에 필요한 이미지·영상을 추가로 생성할 수 있습니다.</div>
+          <div class="image-box" id="imageBox">
+            <div class="image-head"><b>5단계 · AI 이미지 생성</b><span id="imageStatus">준비됨</span></div>
+            <textarea id="imagePrompt" maxlength="1000" placeholder="예: 밤의 서울 골목, 네온사인, 시네마틱 조명, 세로 쇼츠용"></textarea>
+            <div class="image-options">
+              <div><label for="imageModel">모델</label><select id="imageModel"><option value="flux" selected>FLUX</option><option value="turbo">Turbo</option></select></div>
+              <div><label for="imageSize">비율</label><select id="imageSize"><option value="1080x1920" selected>9:16 세로</option><option value="1024x1024">1:1 정사각형</option><option value="1920x1080">16:9 가로</option></select></div>
+            </div>
 <div class="video-ai-box" id="videoAiBox">
             <div class="video-ai-head"><b>6단계 · AI 영상 생성</b><span id="videoAiStatus">준비됨</span></div>
             <textarea id="videoAiPrompt" maxlength="1000" placeholder="예: 비 오는 밤의 서울 골목을 천천히 걷는 장면, 네온사인, 시네마틱, 세로 영상"></textarea>
