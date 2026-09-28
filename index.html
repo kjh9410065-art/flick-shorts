@@ -64,6 +64,11 @@
         <p>현재 버전은 기본 자동 편집부터 시작합니다. 영상 파일은 서버로 업로드하지 않고 브라우저에서 처리합니다.</p>
       </div>
 
+      <div class="editor-tabs" role="tablist" aria-label="쇼츠 제작 메뉴">
+        <button type="button" class="editor-tab active" id="autoShortsTab" role="tab" aria-selected="true">쇼츠 자동생성</button>
+        <button type="button" class="editor-tab" id="extraToolsTab" role="tab" aria-selected="false">추가 기능</button>
+      </div>
+      <div class="editor-tab-panel active" id="autoShortsPanel" role="tabpanel">
       <div class="stage-track" aria-label="1단계 제작 과정"><div class="stage active"><i>1</i><span>영상 업로드</span></div><div class="stage-line"></div><div class="stage"><i>2</i><span>9:16 변환</span></div><div class="stage-line"></div><div class="stage"><i>3</i><span>자동 컷</span></div><div class="stage-line"></div><div class="stage"><i>4</i><span>음악</span></div><div class="stage-line"></div><div class="stage"><i>5</i><span>MP4</span></div></div>
 
       <div class="editor-card">
@@ -111,6 +116,7 @@
             </div>
           </div>
 
+        <div class="editor-extra-panel" id="extraToolsPanel">
           <div class="audio-row">
             <input id="audioInput" type="file" accept="audio/*" hidden />
             <label class="audio-btn" for="audioInput">♫ 배경음악 추가</label>
@@ -202,6 +208,12 @@
               </div>
             </div>
           </div>
+        </div>
+      </div>
+      <div class="editor-tab-panel" id="extraToolsTabPanel" role="tabpanel" hidden>
+        <div class="extra-panel-title"><b>추가 기능</b><span>필요할 때만 사용하세요.</span></div>
+        <div class="extra-panel-placeholder" id="extraToolsMount"></div>
+      </div>
           <button id="renderBtn" class="primary-btn render-btn" disabled>쇼츠 만들기 <span>→</span></button>
           <div class="progress-wrap" id="progressWrap" hidden>
             <div class="progress-head"><span id="progressText">준비 중...</span><b id="progressPercent">0%</b></div>
@@ -272,5 +284,29 @@
     <p>© 2026 FLiCK. All rights reserved.</p>
   </footer>
   <script type="module" src="script.js"></script>
+<script>
+  // 추가 기능 패널을 두 번째 탭으로 이동하고 탭 전환을 처리합니다.
+  (() => {
+    const autoTab = document.getElementById("autoShortsTab");
+    const extraTab = document.getElementById("extraToolsTab");
+    const autoPanel = document.getElementById("autoShortsPanel");
+    const extraPanel = document.getElementById("extraToolsTabPanel");
+    const extraSource = document.getElementById("extraToolsPanel");
+    const mount = document.getElementById("extraToolsMount");
+    if (!autoTab || !extraTab || !autoPanel || !extraPanel || !extraSource || !mount) return;
+    mount.appendChild(extraSource);
+    function show(which) {
+      const extra = which === "extra";
+      autoTab.classList.toggle("active", !extra);
+      extraTab.classList.toggle("active", extra);
+      autoTab.setAttribute("aria-selected", String(!extra));
+      extraTab.setAttribute("aria-selected", String(extra));
+      autoPanel.hidden = extra;
+      extraPanel.hidden = !extra;
+    }
+    autoTab.addEventListener("click", () => show("auto"));
+    extraTab.addEventListener("click", () => show("extra"));
+  })();
+</script>
 </body>
 </html>
