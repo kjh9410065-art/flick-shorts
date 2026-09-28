@@ -167,3 +167,17 @@ footer { max-width:1180px; margin:auto; padding:28px 24px 45px; display:flex; ju
 /* 추가 기능 탭에서는 AI 소재 메뉴를 한 번 더 접지 않고 바로 보여줍니다. */
 .editor-extra-panel .ai-tools-toggle{display:none}
 .editor-extra-panel .ai-tools-content{display:block;padding:0}
+
+/* 쇼츠 자동생성과 추가 기능을 서로 독립된 상위 탭으로 표시합니다. */
+.app-tabs{position:sticky;top:0;z-index:20;display:flex;justify-content:center;gap:6px;padding:10px 18px;border-bottom:1px solid #e8e6f0;background:rgba(255,255,255,.94);backdrop-filter:blur(12px)}
+.app-tab{min-width:150px;padding:11px 22px;border:1px solid #e3e1eb;border-radius:10px;background:#fff;color:#858796;font:700 12px inherit;cursor:pointer;transition:.18s}
+.app-tab.active{border-color:#6b58e8;background:#6b58e8;color:#fff;box-shadow:0 5px 14px rgba(92,74,210,.16)}
+.extra-page{padding:54px 20px 80px;min-height:70vh}
+.extra-page .section-heading{text-align:center}
+.extra-page-card{max-width:860px;margin:28px auto 0}
+.extra-page-card .ai-tools-menu{margin-top:0;border:0;background:transparent;overflow:visible}
+.extra-page-card .ai-tools-content{display:block;padding:0}
+.extra-page-card .ai-tools-title{display:none}
+.extra-page-card .image-box,.extra-page-card .video-ai-box{margin-top:14px}
+.extra-page-card .ai-tools-toggle{display:none}
+@media(max-width:560px){.app-tab{min-width:0;flex:1;padding:10px 12px}.app-tabs{padding:8px 10px}.extra-page{padding:38px 14px 60px}}
