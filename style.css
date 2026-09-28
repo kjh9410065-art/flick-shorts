@@ -121,3 +121,15 @@ footer { max-width:1180px; margin:auto; padding:28px 24px 45px; display:flex; ju
 .voice-options{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:11px}.voice-options>div{display:flex;flex-direction:column;gap:6px}.voice-options label{font-size:10px;font-weight:800;color:#666a7c}.voice-options select{padding:8px 9px;border:1px solid #e1e2ea;border-radius:8px;background:#fff;font-size:10px;color:#303447}.voice-options input[type=range]{width:100%;accent-color:#7055ed}.voice-options output{color:#777c8e;font-size:9px}
 .voice-actions{display:flex;gap:8px;align-items:center}.voice-actions .secondary-btn{flex:1}.voice-box audio{width:100%;height:35px;margin-top:10px}.voice-note{margin:9px 0 0;color:#999dab;font-size:9px;line-height:1.5}
 @media(max-width:520px){.voice-options{grid-template-columns:1fr}}
+
+/* 5단계 AI 이미지 생성 UI입니다. */
+.image-box{margin-top:14px;padding:15px;border:1px solid #e3e2ef;border-radius:13px;background:#fbfaff}
+.image-head{display:flex;align-items:center;justify-content:space-between;font-size:11px}.image-head span{color:#7b70a8;font-size:10px}
+.image-box textarea{width:100%;min-height:90px;margin-top:11px;padding:11px;border:1px solid #e0e1e9;border-radius:9px;resize:vertical;outline:none;font:inherit;font-size:11px;color:#2b2f40}.image-box textarea:focus{border-color:#7055ed}
+.image-options{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:11px}.image-options>div{display:flex;flex-direction:column;gap:6px}.image-options label{font-size:10px;font-weight:800;color:#666a7c}.image-options select{padding:8px 9px;border:1px solid #e1e2ea;border-radius:8px;background:#fff;font-size:10px;color:#303447}
+.image-key-row{display:flex;gap:7px;margin-top:10px}.image-key-row input{min-width:0;flex:1;padding:9px;border:1px solid #e0e1e9;border-radius:8px;font-size:10px;outline:none}
+.image-actions{display:flex;gap:8px;margin-top:10px}.image-actions .secondary-btn{flex:1}
+.image-result{margin-top:10px}.image-result img{display:block;width:100%;max-height:480px;object-fit:contain;border-radius:10px;background:#111}
+.image-result .download-btn{display:block;margin-top:8px;text-align:center}
+.image-note{margin:9px 0 0;color:#999dab;font-size:9px;line-height:1.5}
+@media(max-width:520px){.image-options{grid-template-columns:1fr}}
