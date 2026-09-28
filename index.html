@@ -118,6 +118,21 @@
             <button id="clearAudio" class="small-btn" hidden>삭제</button>
           </div>
 
+          <button id="transcribeBtn" class="secondary-btn" disabled>2단계 · AI 자동 자막 생성</button>
+          <div class="subtitle-box" id="subtitleBox" hidden>
+            <div class="subtitle-head"><b>AI 자동 자막</b><span id="subtitleStatus">대기 중</span></div>
+            <div class="subtitle-options">
+              <label for="subtitleLanguage">언어</label>
+              <select id="subtitleLanguage">
+                <option value="auto" selected>자동 감지</option>
+                <option value="korean">한국어</option>
+                <option value="english">English</option>
+                <option value="japanese">日本語</option>
+                <option value="chinese">中文</option>
+              </select>
+            </div>
+            <div class="subtitle-list" id="subtitleList"></div>
+          </div>
           <button id="renderBtn" class="primary-btn render-btn" disabled>쇼츠 만들기 <span>→</span></button>
           <div class="progress-wrap" id="progressWrap" hidden>
             <div class="progress-head"><span id="progressText">준비 중...</span><b id="progressPercent">0%</b></div>
@@ -139,6 +154,23 @@
           </div>
           <a id="downloadBtn" class="download-btn" hidden>완성 영상 다운로드</a>
         </div>
+      </div>
+    </section>
+
+    <!-- 개발 로드맵 -->
+    <section class="roadmap-section" id="roadmap">
+      <div class="section-heading center">
+        <span>DEVELOPMENT ROADMAP</span>
+        <h2>기능을 단계별로 확장합니다.</h2>
+        <p>현재는 1단계 제작과 2단계 AI 자동 자막을 연결하는 중입니다.</p>
+      </div>
+      <div class="roadmap">
+        <article class="roadmap-item active"><div class="roadmap-number">1</div><div><span>완료 진행</span><h3>영상 업로드 → 9:16 → 자동 컷 → 음악 → MP4</h3><p>브라우저에서 기본 쇼츠 제작과 MP4 출력을 처리합니다.</p></div></article>
+        <article class="roadmap-item active"><div class="roadmap-number">2</div><div><span>현재 개발</span><h3>STT 자동 자막</h3><p>Whisper 기반 음성 인식으로 시간대가 있는 자막을 생성합니다.</p></div></article>
+        <article class="roadmap-item"><div class="roadmap-number">3</div><div><span>다음</span><h3>비트 기반 자동 편집</h3><p>음악의 박자와 영상 구간을 맞춰 컷을 자동 배치합니다.</p></div></article>
+        <article class="roadmap-item"><div class="roadmap-number">4</div><div><span>예정</span><h3>AI 음성</h3><p>텍스트를 음성으로 만들고 영상에 자연스럽게 합성합니다.</p></div></article>
+        <article class="roadmap-item"><div class="roadmap-number">5</div><div><span>예정</span><h3>이미지 생성</h3><p>쇼츠에 필요한 이미지와 장면 소스를 생성합니다.</p></div></article>
+        <article class="roadmap-item"><div class="roadmap-number">6</div><div><span>예정</span><h3>AI 영상 생성</h3><p>텍스트와 이미지에서 영상 장면까지 생성하는 단계입니다.</p></div></article>
       </div>
     </section>
 
