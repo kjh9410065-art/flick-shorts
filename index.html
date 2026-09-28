@@ -16,8 +16,8 @@
     </a>
     <nav class="nav-links" aria-label="주요 메뉴">
       <a href="#editor">제작</a>
-      <a href="#features">기능</a>
-      <a href="#how">사용방법</a>
+      <a href="#editor">1단계 제작</a>
+      <a href="#roadmap">개발 순서</a>
     </nav>
     <button class="nav-cta" data-scroll="#editor">쇼츠 만들기</button>
   </header>
@@ -31,7 +31,7 @@
         <p>영상을 업로드하고 길이와 스타일만 선택하세요.<br />브라우저에서 바로 9:16 쇼츠를 제작합니다.</p>
         <div class="hero-actions">
           <button class="primary-btn" data-scroll="#editor">쇼츠 만들기 <span>→</span></button>
-          <button class="ghost-btn" data-scroll="#how">사용방법</button>
+          <button class="ghost-btn" data-scroll="#roadmap">사용방법</button>
         </div>
         <div class="trust-row"><span>✓ 설치 필요 없음</span><span>✓ 내 브라우저에서 처리</span><span>✓ 9:16 출력</span></div>
       </div>
@@ -48,7 +48,7 @@
             </div>
             <div class="tool-grid">
               <div>▣ 영상</div><div>♫ 음악</div>
-              <div>⏱ 길이</div><div>T 자막</div>
+              <div>✂ 자동 컷</div><div>MP4 출력</div>
             </div>
             <button class="mini-create" data-scroll="#editor">영상 만들기</button>
           </div>
@@ -63,6 +63,8 @@
         <h2>영상 하나로 바로 시작하세요.</h2>
         <p>현재 버전은 기본 자동 편집부터 시작합니다. 영상 파일은 서버로 업로드하지 않고 브라우저에서 처리합니다.</p>
       </div>
+
+      <div class="stage-track" aria-label="1단계 제작 과정"><div class="stage active"><i>1</i><span>영상 업로드</span></div><div class="stage-line"></div><div class="stage"><i>2</i><span>9:16 변환</span></div><div class="stage-line"></div><div class="stage"><i>3</i><span>자동 컷</span></div><div class="stage-line"></div><div class="stage"><i>4</i><span>음악</span></div><div class="stage-line"></div><div class="stage"><i>5</i><span>MP4</span></div></div>
 
       <div class="editor-card">
         <div class="upload-panel">
@@ -98,6 +100,10 @@
                 <option value="left">왼쪽</option>
                 <option value="right">오른쪽</option>
               </select>
+            </div>
+            <div class="control-group">
+              <label for="cutMode">자동 컷</label>
+              <select id="cutMode"><option value="smart" selected>스마트 구간 선택</option><option value="start">처음부터</option><option value="center">가운데 구간</option><option value="end">마지막 구간</option></select>
             </div>
             <div class="control-group">
               <label for="overlayText">화면 문구</label>
@@ -147,8 +153,8 @@
       </div>
     </section>
 
-    <!-- 사용 방법 -->
-    <section class="how-section" id="how">
+
+    <section class="how-section" id="how" hidden>
       <div class="section-heading center"><span>HOW IT WORKS</span><h2>딱 3단계입니다.</h2></div>
       <div class="steps">
         <div class="step"><i>01</i><h3>영상 업로드</h3><p>내 영상을 브라우저에 올립니다.</p></div>
