@@ -171,7 +171,8 @@
             </div>
             <p class="image-note">API 키는 이 브라우저의 로컬 저장소에만 저장합니다. 생성 비용과 한도는 연결한 API 서비스 정책을 따릅니다.</p>
           </div>
-          <div class="video-ai-box" id="videoAiBox">
+          <div class="ai-tools-menu" id="aiToolsMenu"><button type="button" id="aiToolsToggle" class="ai-tools-toggle">AI 소재 생성 <span>＋</span></button><div class="ai-tools-content" id="aiToolsContent"><div class="ai-tools-title">쇼츠 제작에 필요한 이미지·영상을 추가로 생성할 수 있습니다.</div>
+<div class="video-ai-box" id="videoAiBox">
             <div class="video-ai-head"><b>6단계 · AI 영상 생성</b><span id="videoAiStatus">준비됨</span></div>
             <textarea id="videoAiPrompt" maxlength="1000" placeholder="예: 비 오는 밤의 서울 골목을 천천히 걷는 장면, 네온사인, 시네마틱, 세로 영상"></textarea>
             <div class="video-ai-options">
@@ -191,7 +192,7 @@
               <a id="downloadAiVideoBtn" class="download-btn" hidden>AI 영상 다운로드</a>
             </div>
             <p class="video-ai-note">생성 API를 연결해 텍스트에서 짧은 영상 장면을 만듭니다. 생성 비용과 처리 시간은 API 서비스에 따라 달라집니다.</p>
-          </div>
+          </div></div></div></div>
           <button id="renderBtn" class="primary-btn render-btn" disabled>쇼츠 만들기 <span>→</span></button>
           <div class="progress-wrap" id="progressWrap" hidden>
             <div class="progress-head"><span id="progressText">준비 중...</span><b id="progressPercent">0%</b></div>
