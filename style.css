@@ -163,3 +163,7 @@ footer { max-width:1180px; margin:auto; padding:28px 24px 45px; display:flex; ju
 .extra-panel-title{display:flex;justify-content:space-between;align-items:center;margin:2px 0 12px;padding:0 2px;color:#303345;font-size:12px}
 .extra-panel-title span{color:#999baa;font-size:9px}
 .editor-extra-panel{margin:0}
+
+/* 추가 기능 탭에서는 AI 소재 메뉴를 한 번 더 접지 않고 바로 보여줍니다. */
+.editor-extra-panel .ai-tools-toggle{display:none}
+.editor-extra-panel .ai-tools-content{display:block;padding:0}
