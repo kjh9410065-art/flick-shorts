@@ -14,6 +14,8 @@ const fileMeta = document.getElementById("fileMeta");
 const renderBtn = document.getElementById("renderBtn");
 const durationSelect = document.getElementById("duration");
 const positionSelect = document.getElementById("position");
+const cutModeSelect = document.getElementById("cutMode");
+const previewMeta = document.getElementById("previewMeta");
 const overlayText = document.getElementById("overlayText");
 const previewOverlay = document.getElementById("previewOverlay");
 const audioName = document.getElementById("audioName");
@@ -33,6 +35,8 @@ let audioFile = null;
 let videoObjectUrl = null;
 let outputObjectUrl = null;
 let ffmpegLoaded = false;
+let sourceDuration = 0;
+let progressListenerAttached = false;
 
 // 화면에 상태 메시지를 표시합니다.
 function setStatus(message) {
@@ -64,9 +68,48 @@ function setVideo(file) {
   fileInfo.hidden = false;
   fileName.textContent = file.name;
   fileMeta.textContent = `${formatBytes(file.size)} · ${file.type}`;
-  renderBtn.disabled = false;
-  setStatus("영상이 준비되었습니다. 옵션을 선택하고 쇼츠 만들기를 눌러주세요.");
+  const probe = document.createElement("video");
+  const metadataUrl = URL.createObjectURL(file);
+  probe.preload = "metadata";
+  probe.onloadedmetadata = () => {
+    sourceDuration = Number.isFinite(probe.duration) ? probe.duration : 0;
+    URL.revokeObjectURL(metadataUrl);
+    renderBtn.disabled = false;
+    updatePreviewInfo();
+    setStatus("영상이 준비되었습니다. 자동 컷 구간을 계산할 수 있습니다.");
+  };
+  probe.onerror = () => {
+    URL.revokeObjectURL(metadataUrl);
+    renderBtn.disabled = false;
+    setStatus("영상이 준비되었습니다. 옵션을 선택하고 쇼츠 만들기를 눌러주세요.");
+  };
+  probe.src = metadataUrl;
   updateOverlay();
+}
+
+// 선택한 쇼츠 길이를 계산합니다.
+function getTargetDuration() {
+  const requested = Number(durationSelect.value);
+  if (!sourceDuration || requested === 0) return sourceDuration || 0;
+  return Math.min(requested, sourceDuration);
+}
+
+// 자동 컷에 사용할 시작 시점을 계산합니다.
+function getCutStart() {
+  const target = getTargetDuration();
+  const available = Math.max(0, sourceDuration - target);
+  if (!available) return 0;
+  if (cutModeSelect.value === "start") return 0;
+  if (cutModeSelect.value === "end") return available;
+  return available / 2;
+}
+
+// 현재 선택된 구간을 미리보기 정보에 표시합니다.
+function updatePreviewInfo() {
+  if (!videoFile || !previewMeta) return;
+  const target = getTargetDuration();
+  const start = getCutStart();
+  previewMeta.textContent = `원본 ${sourceDuration.toFixed(1)}초 · ${start.toFixed(1)}~${(start + target).toFixed(1)}초 · 9:16`;
 }
 
 // 배경음악 파일을 선택하면 이름을 표시합니다.
@@ -113,6 +156,13 @@ async function loadFFmpeg() {
   ffmpegLoaded = true;
 }
 
+// FFmpeg 진행률 이벤트를 한 번만 연결합니다.
+function attachProgressListener() {
+  if (progressListenerAttached) return;
+  ffmpeg.on("progress", ({ progress }) => setProgress(20 + progress * 75, "쇼츠를 렌더링하는 중..."));
+  progressListenerAttached = true;
+}
+
 // 렌더링 진행률을 화면에 표시합니다.
 function setProgress(percent, message) {
   progressWrap.hidden = false;
@@ -140,6 +190,12 @@ async function renderShorts() {
 
   try {
     await loadFFmpeg();
+    attachProgressListener();
+
+    // 이전 작업 파일을 제거합니다.
+    for (const name of ["input.mp4", "music", "output.mp4"]) {
+      try { await ffmpeg.deleteFile(name); } catch {}
+    }
 
     // 입력 파일을 FFmpeg 가상 파일 시스템에 저장합니다.
     await ffmpeg.writeFile("input.mp4", await fetchFile(videoFile));
@@ -149,8 +205,9 @@ async function renderShorts() {
       await ffmpeg.writeFile("music", await fetchFile(audioFile));
     }
 
-    const requestedDuration = Number(durationSelect.value);
-    const args = ["-i", "input.mp4"];
+    const targetDuration = getTargetDuration();
+    const cutStart = getCutStart();
+    const args = ["-ss", String(cutStart), "-i", "input.mp4"];
 
     // 배경음악이 있으면 두 번째 입력으로 추가합니다.
     if (audioFile) args.push("-i", "music");
@@ -166,7 +223,7 @@ async function renderShorts() {
     args.push("-vf", videoFilter, "-c:v", "libx264", "-preset", "veryfast", "-pix_fmt", "yuv420p");
 
     // 원하는 길이가 원본보다 짧으면 시작부터 해당 길이만 사용합니다.
-    if (requestedDuration > 0) args.push("-t", String(requestedDuration));
+    if (targetDuration > 0) args.push("-t", String(targetDuration));
 
     if (audioFile) {
       args.push("-map", "0:v:0", "-map", "1:a:0", "-shortest", "-c:a", "aac", "-b:a", "192k");
@@ -174,14 +231,10 @@ async function renderShorts() {
       args.push("-c:a", "aac", "-b:a", "128k");
     }
 
-    args.push("-movflags", "+faststart", "output.mp4");
+    args.push("-movflags", "+faststart", "-y", "output.mp4");
 
     // FFmpeg 로그를 받아 현재 작업 단계를 사용자에게 보여줍니다.
-    ffmpeg.on("progress", ({ progress }) => {
-      setProgress(20 + progress * 75, "쇼츠를 렌더링하는 중...");
-    });
-
-    setProgress(18, "영상 설정을 적용하는 중...");
+    setProgress(18, "9:16 변환과 자동 컷을 적용하는 중...");
     await ffmpeg.exec(args);
 
     setProgress(96, "완성 파일을 준비하는 중...");
@@ -232,6 +285,7 @@ renderBtn.addEventListener("click", renderShorts);
 // 선택한 영상을 제거합니다.
 removeVideo.addEventListener("click", () => {
   videoFile = null;
+  sourceDuration = 0;
   videoInput.value = "";
   fileInfo.hidden = true;
   previewVideo.removeAttribute("src");
