@@ -186,3 +186,7 @@ footer { max-width:1180px; margin:auto; padding:28px 24px 45px; display:flex; ju
 .navbar.visible{opacity:1;pointer-events:auto}
 .hero{min-height:100vh;box-sizing:border-box}
 .editor-section[hidden],.roadmap-section[hidden]{display:none!important}
+
+/* 랜딩과 제작 화면을 실제 페이지처럼 전환합니다. */
+.hero.page-hidden{display:none!important}
+.editor-section.page-active{min-height:100vh;padding-top:40px}
