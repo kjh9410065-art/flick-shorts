@@ -1024,24 +1024,44 @@ removeVideo.addEventListener("click", () => {
 });
 
 // 상단 버튼을 편집기로 부드럽게 이동합니다.
-function openEditor(targetSelector) {
+function openEditor() {
+  const hero = document.querySelector(".hero");
   const editor = document.querySelector("#editor");
   const roadmap = document.querySelector("#roadmap");
   const nav = document.querySelector("#siteNav");
   if (!editor) return;
+  hero?.classList.add("page-hidden");
   editor.hidden = false;
-  if (roadmap) roadmap.hidden = false;
+  editor.classList.add("page-active");
+  if (roadmap) roadmap.hidden = true;
   if (nav) nav.classList.add("visible");
   document.body.classList.add("editor-open");
-  const target = document.querySelector(targetSelector || "#editor") || editor;
-  requestAnimationFrame(() => target.scrollIntoView({ behavior: "smooth", block: "start" }));
+  history.pushState({ page: "editor" }, "", "#editor");
+  window.scrollTo({ top: 0, behavior: "instant" });
+}
+
+function showLanding(pushHistory = true) {
+  const hero = document.querySelector(".hero");
+  const editor = document.querySelector("#editor");
+  const roadmap = document.querySelector("#roadmap");
+  const nav = document.querySelector("#siteNav");
+  hero?.classList.remove("page-hidden");
+  if (editor) {
+    editor.hidden = true;
+    editor.classList.remove("page-active");
+  }
+  if (roadmap) roadmap.hidden = true;
+  nav?.classList.remove("visible");
+  document.body.classList.remove("editor-open");
+  if (pushHistory) history.pushState({ page: "landing" }, "", window.location.pathname);
+  window.scrollTo({ top: 0, behavior: "instant" });
 }
 
 document.querySelectorAll("[data-scroll]").forEach((button) => {
   button.addEventListener("click", () => {
     const selector = button.dataset.scroll;
-    if (selector === "#editor" || selector === "#roadmap") {
-      openEditor(selector);
+    if (selector === "#editor") {
+      openEditor();
       return;
     }
     const target = document.querySelector(selector);
@@ -1053,10 +1073,13 @@ const brandButton = document.querySelector(".brand");
 if (brandButton) {
   brandButton.addEventListener("click", (event) => {
     event.preventDefault();
-    document.querySelector("#editor").hidden = true;
-    document.querySelector("#roadmap").hidden = true;
-    document.querySelector("#siteNav").classList.remove("visible");
-    document.body.classList.remove("editor-open");
-    window.scrollTo({ top: 0, behavior: "smooth" });
+    showLanding();
   });
 }
+
+window.addEventListener("popstate", () => {
+  if (window.location.hash === "#editor") openEditor();
+  else showLanding(false);
+});
+
+if (window.location.hash === "#editor") openEditor();
