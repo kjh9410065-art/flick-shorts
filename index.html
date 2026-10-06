@@ -18,7 +18,7 @@
   </header>
   <div class="app-tabs" id="appTabs" role="tablist" aria-label="FLiCK Shorts 기능" hidden>
     <button type="button" class="app-tab active" id="shortsAutoTab" role="tab" aria-selected="true">쇼츠 자동생성</button>
-    <button type="button" class="app-tab" id="extraFeaturesTab" role="tab" aria-selected="false">추가 기능</button>
+    <button type="button" class="app-tab" id="extraFeaturesTab" role="tab" aria-selected="false">쇼츠 도구</g/button>
   </div>
 
   <main id="top">
@@ -149,8 +149,8 @@
     <section class="extra-page" id="extraFeaturesPage" hidden>
       <div class="section-heading">
         <span>EXTRA FEATURES</span>
-        <h2>추가 기능</h2>
-        <p>기본 쇼츠 자동생성에 필요한 기능만 선택해서 사용할 수 있습니다.</p>
+        <h2>쇼츠 도구</g/h2>
+        <p>쇼츠 제작에 필요한 편집 및 AI 도구를 선택해서 사용할 수 있습니다.</p>
       </div>
       <div class="extra-page-card" id="extraFeaturesMount">
         <div class="editor-extra-panel" id="extraToolsPanel">
@@ -162,11 +162,11 @@
           </div>
           <label class="beat-toggle">
             <input id="beatEdit" type="checkbox" />
-            <span><b>3단계 · 비트 기반 자동 편집</b><small>음악의 박자를 분석해 영상 컷을 박자에 맞춥니다.</small></span>
+            <span><b>비트 기반 자동 편집</b><small>음악의 박자를 분석해 영상 컷을 박자에 맞춥니다.</small></span>
           </label>
 
           <div class="voice-box" id="voiceBox">
-            <div class="voice-head"><b>4단계 · AI 음성</b><span id="voiceStatus">텍스트를 입력하세요</span></div>
+            <div class="voice-head"><b>AI 음성</b><span id="voiceStatus">텍스트를 입력하세요</span></div>
             <textarea id="voiceText" maxlength="1000" placeholder="예: 오늘 소개할 장소는 분위기가 정말 좋습니다."></textarea>
             <div class="voice-options">
               <div><label for="voiceLanguage">언어</label><select id="voiceLanguage"><option value="ko" selected>한국어</option><option value="en">English</option><option value="es">Español</option><option value="pt">Português</option><option value="fr">Français</option></select></div>
@@ -186,7 +186,7 @@
               <div class="ai-tools-title">쇼츠 제작에 필요한 이미지·영상을 추가로 생성할 수 있습니다.</div>
 
               <div class="image-box" id="imageBox">
-                <div class="image-head"><b>5단계 · AI 이미지 생성</b><span id="imageStatus">준비됨</span></div>
+                <div class="image-head"><b>AI 이미지 생성</b><span id="imageStatus">준비됨</span></div>
                 <textarea id="imagePrompt" maxlength="1000" placeholder="예: 밤의 서울 골목, 네온사인, 시네마틱 조명, 세로 쇼츠용"></textarea>
                 <div class="image-options">
                   <div><label for="imageModel">모델</label><select id="imageModel"><option value="flux" selected>FLUX</option><option value="turbo">Turbo</option></select></div>
@@ -208,7 +208,7 @@
               </div>
 
               <div class="video-ai-box" id="videoAiBox">
-                <div class="video-ai-head"><b>6단계 · AI 영상 생성</b><span id="videoAiStatus">준비됨</span></div>
+                <div class="video-ai-head"><b>AI 영상 생성</b><span id="videoAiStatus">준비됨</span></div>
                 <textarea id="videoAiPrompt" maxlength="1000" placeholder="예: 비 오는 밤의 서울 골목을 천천히 걷는 장면, 네온사인, 시네마틱, 세로 영상"></textarea>
                 <div class="video-ai-options">
                   <div><label for="videoAiModel">모델</label><select id="videoAiModel"><option value="wan">Wan 2.1</option><option value="ltx">LTX-Video</option></select></div>
