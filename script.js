@@ -68,7 +68,6 @@ const generatedAiVideo = document.getElementById("generatedAiVideo");
 const downloadAiVideoBtn = document.getElementById("downloadAiVideoBtn");
 const aiToolsToggle = document.getElementById("aiToolsToggle");
 const aiToolsContent = document.getElementById("aiToolsContent");
-const stages = [...document.querySelectorAll(".stage")];
 
 const ffmpeg = new FFmpeg();
 let videoFile = null;
@@ -113,6 +112,8 @@ function setVideo(file) {
   }
 
   videoFile = file;
+  document.querySelector(".editor-card")?.classList.add("has-video");
+  document.querySelector(".preview-head b")?.replaceChildren(document.createTextNode("원본 미리보기"));
   subtitleSegments = [];
   beatCuts = [];
   subtitleBox.hidden = true;
@@ -136,14 +137,12 @@ function setVideo(file) {
     URL.revokeObjectURL(metadataUrl);
     renderBtn.disabled = false;
     transcribeBtn.disabled = false;
-    setStage(1);
     setStatus("영상이 준비되었습니다. 쇼츠 만들기를 눌러 자동 생성하세요.");
   };
   probe.onerror = () => {
     URL.revokeObjectURL(metadataUrl);
     renderBtn.disabled = false;
     transcribeBtn.disabled = false;
-    setStage(1);
     setStatus("영상이 준비되었습니다. 쇼츠 만들기를 눌러 자동 생성하세요.");
   };
   probe.src = metadataUrl;
@@ -282,18 +281,18 @@ async function generateSubtitles(options = {}) {
   renderBtn.disabled = true;
   subtitleBox.hidden = false;
   subtitleStatus.textContent = "분석 중";
-  setStatus("선택한 쇼츠 구간의 음성을 분석합니다.");
+  if (!silent) setStatus("음성을 분석하는 중입니다.");
 
   try {
     await loadFFmpeg();
     for (const name of ["input.mp4", "speech.wav"]) {
       try { await ffmpeg.deleteFile(name); } catch {}
     }
-    setProgress(18, "음성 데이터를 추출하는 중...");
+    setProgress(18, "음성을 확인하는 중입니다...");
     const speechData = await extractSpeechAudio();
     const speechUrl = URL.createObjectURL(new Blob([speechData.buffer], { type: "audio/wav" }));
     const model = await loadWhisper();
-    setProgress(35, "AI가 음성을 텍스트로 변환하는 중...");
+    setProgress(35, "자동 자막을 만드는 중...");
 
     const language = subtitleLanguage.value;
     const options = {
@@ -312,7 +311,6 @@ async function generateSubtitles(options = {}) {
     renderSubtitleEditor();
     subtitleBox.hidden = false;
     subtitleStatus.textContent = subtitleSegments.length ? `${subtitleSegments.length}개 생성` : "음성 없음";
-    setStage(2);
     if (!silent) {
       setProgress(100, "자동 자막 생성 완료");
       setStatus(subtitleSegments.length ? "자동 자막이 생성되었습니다." : "인식된 음성이 없습니다.");
@@ -401,7 +399,6 @@ async function generateVoice() {
     voicePreview.hidden = false;
     clearVoice.hidden = false;
     voiceStatus.textContent = "생성 완료";
-    setStage(4);
     setProgress(100, "AI 음성 생성 완료");
     setStatus("AI 음성이 생성되었습니다. 미리 들어보고 쇼츠 만들기를 누르세요.");
   } catch (error) {
@@ -661,7 +658,6 @@ async function generateImage() {
     downloadImageBtn.hidden = false;
 
     imageStatus.textContent = "생성 완료";
-    setStage(5);
     setProgress(100, "AI 이미지 생성 완료");
     setStatus("AI 이미지가 생성되었습니다.");
   } catch (error) {
@@ -769,7 +765,6 @@ async function generateAiVideo() {
     downloadAiVideoBtn.hidden = false;
 
     videoAiStatus.textContent = "생성 완료";
-    setStage(6);
     setProgress(100, "AI 영상 생성 완료");
     setStatus("AI 영상이 생성되었습니다.");
   } catch (error) {
@@ -801,7 +796,7 @@ async function renderShorts() {
   transcribeBtn.disabled = true;
   generateVoiceBtn.disabled = true;
   downloadBtn.hidden = true;
-  setStatus("렌더링을 시작합니다.");
+  setStatus("쇼츠를 만드는 중입니다.");
 
   try {
     await loadFFmpeg();
@@ -823,14 +818,13 @@ async function renderShorts() {
     }
 
     if (subtitleSegments.length) {
-      setProgress(15, "자막 폰트를 준비하는 중...");
+      setProgress(22, "자동 자막을 영상에 적용하는 중...");
       await ensureSubtitleFont();
     }
 
     let beatSegments = [];
     if (beatEdit.checked) {
       beatSegments = await prepareBeatEdit();
-      setStage(3);
     }
 
     const targetDuration = getTargetDuration();
@@ -906,7 +900,7 @@ async function renderShorts() {
     if (targetDuration > 0) args.push("-t", String(targetDuration));
     args.push("-movflags", "+faststart", "-y", "output.mp4");
 
-    setProgress(25, beatSegments.length > 1 ? "비트에 맞춰 컷을 이어 붙이는 중..." : "9:16 변환 및 MP4 렌더링 중...");
+    setProgress(25, beatSegments.length > 1 ? "음악에 맞춰 영상을 편집하는 중..." : "9:16 세로 영상으로 변환하고 렌더링하는 중...");
     await ffmpeg.exec(args);
 
     setProgress(96, "완성 파일을 준비하는 중...");
@@ -916,9 +910,11 @@ async function renderShorts() {
 
     previewVideo.src = outputObjectUrl;
     previewVideo.load();
+    document.querySelector(".preview-head b")?.replaceChildren(document.createTextNode("완성된 쇼츠"));
     downloadBtn.href = outputObjectUrl;
     downloadBtn.download = "flick-shorts.mp4";
     downloadBtn.hidden = false;
+    document.getElementById("resetResultBtn")?.removeAttribute("hidden");
 
     setProgress(100, "완성되었습니다.");
     setStatus(beatSegments.length > 1 ? "비트 기반 자동 편집이 적용된 쇼츠가 완성되었습니다." : "쇼츠가 완성되었습니다.");
@@ -987,6 +983,16 @@ saveVideoAiKey.addEventListener("click", saveVideoAiApiKeyValue);
 generateVideoAiBtn.addEventListener("click", generateAiVideo);
 clearVideoAi.addEventListener("click", clearGeneratedAiVideo);
 renderBtn.addEventListener("click", renderShorts);
+document.getElementById("resetResultBtn")?.addEventListener("click", () => {
+  if (outputObjectUrl) URL.revokeObjectURL(outputObjectUrl);
+  outputObjectUrl = null;
+  downloadBtn.hidden = true;
+  document.getElementById("resetResultBtn").hidden = true;
+  previewVideo.src = videoObjectUrl || "";
+  previewVideo.load();
+  document.querySelector(".preview-head b")?.replaceChildren(document.createTextNode("원본 미리보기"));
+  setStatus("영상이 준비되었습니다. 쇼츠 만들기를 눌러 자동 생성하세요.");
+});
 beatEdit.addEventListener("change", () => {
   if (beatEdit.checked) setStatus("비트 기반 편집이 켜졌습니다. 배경음악이 없으면 영상 원본 오디오를 분석합니다.");
   else setStatus("비트 기반 편집을 끄고 일반 자동 컷을 사용합니다.");
@@ -1015,6 +1021,8 @@ clearAudio.addEventListener("click", () => {
 // 영상을 제거합니다.
 removeVideo.addEventListener("click", () => {
   videoFile = null;
+  document.querySelector(".editor-card")?.classList.remove("has-video");
+  document.querySelector(".preview-head b")?.replaceChildren(document.createTextNode("미리보기"));
   audioFile = null;
   sourceDuration = 0;
   subtitleSegments = [];
@@ -1033,7 +1041,6 @@ removeVideo.addEventListener("click", () => {
   transcribeBtn.disabled = true;
   audioName.textContent = "선택하지 않음";
   clearAudio.hidden = true;
-  setStage(0);
   setStatus("영상을 선택해주세요.");
 });
 
