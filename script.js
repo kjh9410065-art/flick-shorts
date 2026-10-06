@@ -1001,6 +1001,18 @@ function setAudio(file) {
   }
   audioFile = file;
   audioName.textContent = file.name;
+  const meta = document.getElementById("audioMeta");
+  const preview = document.getElementById("musicPreview");
+  const beatName = document.getElementById("beatMusicName");
+  const resultText = document.getElementById("musicResultText");
+  const url = URL.createObjectURL(file);
+  if (preview.dataset.objectUrl) URL.revokeObjectURL(preview.dataset.objectUrl);
+  preview.dataset.objectUrl = url;
+  preview.src = url;
+  preview.hidden = false;
+  if (meta) meta.textContent = `${(file.size / 1024 / 1024).toFixed(2)} MB · 오디오 파일`;
+  if (beatName) beatName.textContent = file.name;
+  if (resultText) resultText.textContent = `${file.name}이(가) 선택되었습니다. 쇼츠 렌더링에 사용할 수 있습니다.`;
   clearAudio.hidden = false;
   setStatus("배경음악이 선택되었습니다.");
 }
@@ -1010,6 +1022,16 @@ clearAudio.addEventListener("click", () => {
   audioFile = null;
   audioInput.value = "";
   audioName.textContent = "선택하지 않음";
+  const meta = document.getElementById("audioMeta");
+  const preview = document.getElementById("musicPreview");
+  const beatName = document.getElementById("beatMusicName");
+  const resultText = document.getElementById("musicResultText");
+  if (meta) meta.textContent = "음악 파일을 선택하면 정보가 표시됩니다.";
+  if (beatName) beatName.textContent = "현재 선택된 음악 사용";
+  if (resultText) resultText.textContent = "음악 파일을 선택하면 미리듣기와 파일 정보가 표시됩니다.";
+  if (preview.dataset.objectUrl) URL.revokeObjectURL(preview.dataset.objectUrl);
+  preview.removeAttribute("src");
+  preview.hidden = true;
   clearAudio.hidden = true;
 });
 
@@ -1092,6 +1114,43 @@ function showLanding(pushHistory = true) {
   if (pushHistory) history.pushState({ page: "landing" }, "", window.location.pathname);
   window.scrollTo({ top: 0, behavior: "instant" });
 }
+
+
+// 상세 쇼츠 도구의 보조 인터랙션을 연결합니다.
+const beatVideoInput = document.getElementById("beatVideoInput");
+beatVideoInput?.addEventListener("change", () => setVideo(beatVideoInput.files[0]));
+
+const voiceCharCount = document.getElementById("voiceCharCount");
+voiceText.addEventListener("input", () => {
+  if (voiceCharCount) voiceCharCount.textContent = `${voiceText.value.length} / 1000`;
+});
+
+document.getElementById("musicVolume")?.addEventListener("input", (event) => {
+  const output = document.getElementById("musicVolumeValue");
+  if (output) output.textContent = Math.round(Number(event.target.value) * 100) + "%";
+});
+document.getElementById("originalVolume")?.addEventListener("input", (event) => {
+  const output = document.getElementById("originalVolumeValue");
+  if (output) output.textContent = Math.round(Number(event.target.value) * 100) + "%";
+});
+document.getElementById("applyMusicBtn")?.addEventListener("click", () => {
+  if (!audioFile) {
+    setStatus("먼저 배경음악을 선택해주세요.");
+    return;
+  }
+  setStatus("배경음악이 선택되었습니다. 쇼츠 자동생성에서 바로 사용할 수 있습니다.");
+});
+
+document.getElementById("runBeatEditBtn")?.addEventListener("click", async () => {
+  if (!videoFile) {
+    setStatus("먼저 쇼츠에 사용할 영상을 선택해주세요.");
+    showEditorTab("auto");
+    return;
+  }
+  beatEdit.checked = true;
+  showEditorTab("auto");
+  await renderShorts();
+});
 
 document.querySelectorAll("[data-scroll]").forEach((button) => {
   button.addEventListener("click", () => {
