@@ -1127,7 +1127,6 @@ function showLanding(pushHistory = true) {
 // 상세 쇼츠 도구의 보조 인터랙션을 연결합니다.
 // 음악 생성기 UI 요소를 가져옵니다.
 const musicPrompt = document.getElementById("musicPrompt");
-const musicDuration = document.getElementById("musicDuration");
 const musicVocal = document.getElementById("musicVocal");
 const musicPromptCount = document.getElementById("musicPromptCount");
 const musicLyrics = document.getElementById("musicLyrics");
@@ -1145,9 +1144,7 @@ const generateMusicBtn = document.getElementById("generateMusicBtn");
 
 // 선택값을 생성기 요약 영역에 반영합니다.
 function updateMusicGeneratorSummary() {
-  const durationSummary = document.getElementById("musicDurationSummary");
   const vocalSummary = document.getElementById("musicVocalSummary");
-  if (durationSummary) durationSummary.textContent = (musicDuration?.value || "-") + "초";
   if (vocalSummary) vocalSummary.textContent = musicVocal?.selectedOptions[0]?.textContent || "-";
 }
 
@@ -1186,7 +1183,7 @@ musicPrompt?.addEventListener("input", () => {
   if (musicPromptCount) musicPromptCount.textContent = musicPrompt.value.length + " / 500";
   if (musicGeneratorStatus) musicGeneratorStatus.textContent = musicPrompt.value.trim() ? "생성 가능" : "프롬프트를 입력하세요";
 });
-[musicDuration, musicVocal].forEach((input) => input?.addEventListener("change", updateMusicGeneratorSummary));
+musicVocal?.addEventListener("change", updateMusicGeneratorSummary);
 generateMusicBtn?.addEventListener("click", generateMusic);
 regenerateMusicBtn?.addEventListener("click", generateMusic);
 clearGeneratedMusicBtn?.addEventListener("click", clearGeneratedMusic);
