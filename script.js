@@ -1022,7 +1022,7 @@ function setAudio(file) {
   if (beatName) beatName.textContent = file.name;
   if (resultText) resultText.textContent = `${file.name}이(가) 선택되었습니다. 쇼츠 렌더링에 사용할 수 있습니다.`;
   clearAudio.hidden = false;
-  setStatus("배경음악이 선택되었습니다.");
+  setStatus("기존 음악이 선택되었습니다.");
 }
 
 
@@ -1125,6 +1125,72 @@ function showLanding(pushHistory = true) {
 
 
 // 상세 쇼츠 도구의 보조 인터랙션을 연결합니다.
+// 음악 생성기 UI 요소를 가져옵니다.
+const musicPrompt = document.getElementById("musicPrompt");
+const musicGenre = document.getElementById("musicGenre");
+const musicMood = document.getElementById("musicMood");
+const musicDuration = document.getElementById("musicDuration");
+const musicVocal = document.getElementById("musicVocal");
+const musicPromptCount = document.getElementById("musicPromptCount");
+const musicGeneratorStatus = document.getElementById("musicGeneratorStatus");
+const musicGeneratorResultText = document.getElementById("musicGeneratorResultText");
+const generatedMusicPreview = document.getElementById("generatedMusicPreview");
+const generatedMusicMeta = document.getElementById("generatedMusicMeta");
+const generatedMusicDuration = document.getElementById("generatedMusicDuration");
+const generatedMusicType = document.getElementById("generatedMusicType");
+const downloadMusicBtn = document.getElementById("downloadMusicBtn");
+const regenerateMusicBtn = document.getElementById("regenerateMusicBtn");
+const clearGeneratedMusicBtn = document.getElementById("clearGeneratedMusicBtn");
+const generateMusicBtn = document.getElementById("generateMusicBtn");
+
+// 선택값을 생성기 요약 영역에 반영합니다.
+function updateMusicGeneratorSummary() {
+  const genreSummary = document.getElementById("musicGenreSummary");
+  const moodSummary = document.getElementById("musicMoodSummary");
+  const durationSummary = document.getElementById("musicDurationSummary");
+  const vocalSummary = document.getElementById("musicVocalSummary");
+  if (genreSummary) genreSummary.textContent = musicGenre?.selectedOptions[0]?.textContent || "-";
+  if (moodSummary) moodSummary.textContent = musicMood?.selectedOptions[0]?.textContent || "-";
+  if (durationSummary) durationSummary.textContent = (musicDuration?.value || "-") + "초";
+  if (vocalSummary) vocalSummary.textContent = musicVocal?.selectedOptions[0]?.textContent || "-";
+}
+
+// 음악 생성 API를 연결할 독립 함수입니다. 현재는 실제 API를 임의로 호출하지 않습니다.
+async function generateMusic() {
+  if (!musicPrompt?.value.trim()) {
+    if (musicGeneratorStatus) musicGeneratorStatus.textContent = "프롬프트를 입력하세요";
+    setStatus("먼저 만들고 싶은 음악을 설명해주세요.");
+    musicPrompt?.focus();
+    return;
+  }
+  if (musicGeneratorStatus) musicGeneratorStatus.textContent = "API 연결 대기";
+  if (musicGeneratorResultText) musicGeneratorResultText.textContent = "현재 프로젝트에는 실제 음악 생성 API가 연결되어 있지 않습니다.";
+  setStatus("음악 생성 API 연결이 필요합니다.");
+}
+
+// 생성된 음악 결과를 제거합니다.
+function clearGeneratedMusic() {
+  if (generatedMusicPreview?.dataset.objectUrl) URL.revokeObjectURL(generatedMusicPreview.dataset.objectUrl);
+  generatedMusicPreview?.removeAttribute("src");
+  if (generatedMusicPreview) generatedMusicPreview.hidden = true;
+  if (generatedMusicMeta) generatedMusicMeta.hidden = true;
+  if (downloadMusicBtn) downloadMusicBtn.hidden = true;
+  if (regenerateMusicBtn) regenerateMusicBtn.hidden = true;
+  if (clearGeneratedMusicBtn) clearGeneratedMusicBtn.hidden = true;
+  if (musicGeneratorResultText) musicGeneratorResultText.textContent = "생성된 음악이 여기에 표시됩니다. 음악을 생성하면 바로 미리 들어볼 수 있습니다.";
+  if (musicGeneratorStatus) musicGeneratorStatus.textContent = "프롬프트를 입력하세요";
+}
+
+// 음악 생성기 입력과 버튼을 연결합니다.
+musicPrompt?.addEventListener("input", () => {
+  if (musicPromptCount) musicPromptCount.textContent = musicPrompt.value.length + " / 500";
+  if (musicGeneratorStatus) musicGeneratorStatus.textContent = musicPrompt.value.trim() ? "생성 가능" : "프롬프트를 입력하세요";
+});
+[musicGenre, musicMood, musicDuration, musicVocal].forEach((input) => input?.addEventListener("change", updateMusicGeneratorSummary));
+generateMusicBtn?.addEventListener("click", generateMusic);
+regenerateMusicBtn?.addEventListener("click", generateMusic);
+clearGeneratedMusicBtn?.addEventListener("click", clearGeneratedMusic);
+updateMusicGeneratorSummary();
 const beatVideoInput = document.getElementById("beatVideoInput");
 beatVideoInput?.addEventListener("change", () => setVideo(beatVideoInput.files[0]));
 
@@ -1143,10 +1209,10 @@ document.getElementById("originalVolume")?.addEventListener("input", (event) => 
 });
 document.getElementById("applyMusicBtn")?.addEventListener("click", () => {
   if (!audioFile) {
-    setStatus("먼저 배경음악을 선택해주세요.");
+    setStatus("먼저 사용할 음악 파일을 선택해주세요.");
     return;
   }
-  setStatus("배경음악이 선택되었습니다. 쇼츠 자동생성에서 바로 사용할 수 있습니다.");
+  setStatus("기존 음악이 선택되었습니다. 쇼츠 자동생성에서 바로 사용할 수 있습니다.");
 });
 
 document.getElementById("runBeatEditBtn")?.addEventListener("click", async () => {
