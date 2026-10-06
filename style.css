@@ -356,3 +356,7 @@ footer { max-width:1180px; margin:auto; padding:28px 24px 45px; display:flex; ju
 .existing-music-section{margin-top:18px}
 @media (max-width:900px){.generator-summary{grid-template-columns:repeat(2,minmax(0,1fr))}}
 @media (max-width:640px){.generator-summary{grid-template-columns:1fr 1fr}.music-generator-result{align-items:stretch;flex-direction:column}}
+
+/* 음악생성기 가사 입력 영역을 강조합니다. */
+.lyrics-head{margin-top:22px}
+.lyrics-textarea{min-height:150px}
