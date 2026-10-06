@@ -1119,7 +1119,7 @@ window.addEventListener("popstate", () => {
     openEditor(false);
     showEditorTab("extra", false);
   } else if (window.location.hash === "#editor") {
-    openEditor();
+    openEditor(false);
   } else {
     showLanding(false);
   }
