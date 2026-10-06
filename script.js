@@ -1132,6 +1132,8 @@ const musicMood = document.getElementById("musicMood");
 const musicDuration = document.getElementById("musicDuration");
 const musicVocal = document.getElementById("musicVocal");
 const musicPromptCount = document.getElementById("musicPromptCount");
+const musicLyrics = document.getElementById("musicLyrics");
+const musicLyricsCount = document.getElementById("musicLyricsCount");
 const musicGeneratorStatus = document.getElementById("musicGeneratorStatus");
 const musicGeneratorResultText = document.getElementById("musicGeneratorResultText");
 const generatedMusicPreview = document.getElementById("generatedMusicPreview");
@@ -1163,7 +1165,7 @@ async function generateMusic() {
     musicPrompt?.focus();
     return;
   }
-  if (musicGeneratorStatus) musicGeneratorStatus.textContent = "API 연결 대기";
+  if (musicGeneratorStatus) musicGeneratorStatus.textContent = musicVocal?.value === "vocal" && musicLyrics?.value.trim() ? "가사 포함 · API 연결 대기" : "API 연결 대기";
   if (musicGeneratorResultText) musicGeneratorResultText.textContent = "현재 프로젝트에는 실제 음악 생성 API가 연결되어 있지 않습니다.";
   setStatus("음악 생성 API 연결이 필요합니다.");
 }
@@ -1182,6 +1184,10 @@ function clearGeneratedMusic() {
 }
 
 // 음악 생성기 입력과 버튼을 연결합니다.
+musicLyrics?.addEventListener("input", () => {
+  if (musicLyricsCount) musicLyricsCount.textContent = musicLyrics.value.length + " / 2000";
+});
+
 musicPrompt?.addEventListener("input", () => {
   if (musicPromptCount) musicPromptCount.textContent = musicPrompt.value.length + " / 500";
   if (musicGeneratorStatus) musicGeneratorStatus.textContent = musicPrompt.value.trim() ? "생성 가능" : "프롬프트를 입력하세요";
