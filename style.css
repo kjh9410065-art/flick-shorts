@@ -190,3 +190,12 @@ footer { max-width:1180px; margin:auto; padding:28px 24px 45px; display:flex; ju
 /* 랜딩과 제작 화면을 실제 페이지처럼 전환합니다. */
 .hero.page-hidden{display:none!important}
 .editor-section.page-active{min-height:100vh;padding-top:40px}
+
+/* 자동생성 탭은 기본 쇼츠 제작에 집중하고 선택 기능은 별도 탭에서만 보여줍니다. */
+.app-tabs[hidden]{display:none!important}
+#transcribeBtn{display:none}
+.subtitle-options{display:none}
+.optional-label{margin-left:4px;color:#9b9eac;font-size:9px;font-weight:600}
+.extra-page{padding-top:42px}
+.extra-page-card .editor-extra-panel{margin:0}
+.extra-page-card .audio-row{margin-top:0}
