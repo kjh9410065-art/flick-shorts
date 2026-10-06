@@ -199,3 +199,48 @@ footer { max-width:1180px; margin:auto; padding:28px 24px 45px; display:flex; ju
 .extra-page{padding-top:42px}
 .extra-page-card .editor-extra-panel{margin:0}
 .extra-page-card .audio-row{margin-top:0}
+
+/* 자동생성 화면은 영상이 올라온 뒤에만 세부 설정을 보여줍니다. */
+.basic-options{display:none;margin-top:14px;padding:14px;border:1px solid #e7e8ef;border-radius:14px;background:#fafbfe}
+.editor-card.has-video .basic-options{display:block}
+.basic-options-title{display:flex;align-items:center;justify-content:space-between;margin-bottom:10px;color:#303447;font-size:12px}
+.basic-options-title span{color:#969aaa;font-size:9px;font-weight:600}
+.editor-card:not(.has-video) .render-btn{margin-top:14px}
+.editor-card:not(.has-video) .status{margin-top:10px}
+.subtitle-box{display:none!important}
+.result-actions{display:flex;gap:8px;margin-top:12px}
+.result-actions .download-btn{flex:1;text-align:center;margin:0}
+.result-actions .small-btn{white-space:nowrap}
+.preview-panel .phone-preview{position:relative}
+.editor-card.has-video .empty-preview{display:none}
+
+/* 쇼츠 도구는 기능별 카드로 접어서 처음부터 긴 설정을 노출하지 않습니다. */
+.extra-page-card{display:grid;gap:12px}
+.tool-card{border:1px solid #e4e5ed;border-radius:16px;background:#fff;overflow:hidden}
+.tool-card details>summary{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:17px 18px;cursor:pointer;list-style:none;color:#2e3244;font-size:13px;font-weight:800}
+.tool-card details>summary::-webkit-details-marker{display:none}
+.tool-card details>summary::after{content:"＋";color:#7060dc;font-size:17px;font-weight:500}
+.tool-card details[open]>summary::after{content:"－"}
+.tool-card details>summary span{margin-left:auto;color:#9a9dab;font-size:9px;font-weight:600}
+.tool-card-body{padding:0 18px 18px}
+.tool-card .audio-row{margin-top:0}
+.tool-card .voice-box,.tool-card .image-box,.tool-card .video-ai-box{margin-top:0;border:0;background:transparent;padding:0}
+.tool-card .image-box,.tool-card .video-ai-box{box-shadow:none}
+.tool-card .ai-tools-menu{display:none}
+.tool-card textarea{min-height:88px}
+.tool-card .voice-head,.tool-card .image-head,.tool-card .video-ai-head{padding-top:0}
+.tool-card .image-note,.tool-card .video-ai-note,.tool-card .voice-note{margin-bottom:0}
+
+/* 모바일에서는 자동생성 흐름과 결과를 한 열로 정리합니다. */
+@media(max-width:760px){
+  .editor-card{grid-template-columns:1fr;padding:12px;gap:12px}
+  .upload-panel,.preview-panel{padding:14px}
+  .dropzone{min-height:160px}
+  .controls{grid-template-columns:1fr}
+  .control-group:last-child{grid-column:auto}
+  .result-actions{flex-direction:column}
+  .result-actions .download-btn,.result-actions .small-btn{width:100%;box-sizing:border-box}
+  .extra-page{padding-left:14px;padding-right:14px}
+  .tool-card details>summary{padding:15px}
+  .tool-card-body{padding:0 15px 15px}
+}
