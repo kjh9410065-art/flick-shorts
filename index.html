@@ -154,7 +154,7 @@
       </div>
 
       <div class="tool-tabs" role="tablist" aria-label="쇼츠 도구">
-        <button type="button" class="tool-tab active" data-tool-tab="0" role="tab" aria-selected="true">배경음악</button>
+        <button type="button" class="tool-tab active" data-tool-tab="0" role="tab" aria-selected="true">음악생성기</button>
         <button type="button" class="tool-tab" data-tool-tab="1" role="tab" aria-selected="false">비트 편집</button>
         <button type="button" class="tool-tab" data-tool-tab="2" role="tab" aria-selected="false">AI 음성</button>
         <button type="button" class="tool-tab" data-tool-tab="3" role="tab" aria-selected="false">AI 이미지</button>
@@ -163,47 +163,40 @@
 
       <div class="extra-page-card detailed-tools" id="extraFeaturesMount">
         <div class="tool-panel active" data-tool-panel="0" role="tabpanel">
-          <div class="workspace-head">
-            <div class="workspace-kicker">AUDIO</div>
-            <h3>배경음악</h3>
-            <p>쇼츠에 사용할 배경음악을 추가하고 영상 분위기에 맞게 조절하세요.</p>
-          </div>
-          <div class="workspace-grid music-workspace">
-            <div class="workspace-section">
-              <div class="workspace-section-head"><b>음악 파일</b><span>MP3 · WAV · M4A 등</span></div>
-              <input id="audioInput" type="file" accept="audio/*" hidden />
-              <label class="large-dropzone" for="audioInput">
-                <span class="drop-icon">♫</span>
-                <strong>음악 파일을 끌어놓거나 클릭하세요</strong>
-                <small>선택한 음악은 쇼츠 렌더링 시 자동으로 적용됩니다.</small>
-              </label>
-              <div class="selected-file" id="audioFileCard">
-                <div><b id="audioName">선택하지 않음</b><span id="audioMeta">음악 파일을 선택하면 정보가 표시됩니다.</span></div>
-                <button id="clearAudio" class="small-btn" hidden>삭제</button>
-              </div>
-              <audio id="musicPreview" class="wide-audio" controls hidden></audio>
-              <div class="waveform" id="musicWaveform" aria-hidden="true">
-                <i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i>
-              </div>
-            </div>
-            <div class="workspace-section settings-section">
-              <div class="workspace-section-head"><b>오디오 설정</b><span>쇼츠에 맞게 조절</span></div>
-              <div class="setting-grid">
-                <label class="setting-field"><span>배경음악 볼륨</span><input id="musicVolume" type="range" min="0" max="1" step="0.05" value="0.35" /><output id="musicVolumeValue">35%</output></label>
-                <label class="setting-field"><span>원본 영상 음량</span><input id="originalVolume" type="range" min="0" max="1" step="0.05" value="1" /><output id="originalVolumeValue">100%</output></label>
-                <label class="setting-field"><span>음악 시작 위치</span><input id="musicStart" type="number" min="0" step="0.1" value="0" /><small>초 단위</small></label>
-                <label class="setting-check"><input id="musicLoop" type="checkbox" checked /><span><b>음악 반복</b><small>영상 길이에 맞춰 음악을 반복합니다.</small></span></label>
-              </div>
-              <div class="workspace-note">배경음악은 쇼츠 자동생성 화면에서 선택된 영상에 적용할 수 있습니다.</div>
-            </div>
-          </div>
-          <div class="workspace-result">
-            <div><span class="result-label">RESULT</span><b>배경음악 준비 상태</b><p id="musicResultText">음악 파일을 선택하면 미리듣기와 파일 정보가 표시됩니다.</p></div>
-            <button id="applyMusicBtn" class="primary-btn tool-primary-btn">배경음악 적용</button>
-          </div>
-        </div>
-
-        <div class="tool-panel" data-tool-panel="1" role="tabpanel" hidden>
+  <div class="workspace-head"><div class="workspace-kicker">AUDIO GENERATOR</div><h3>음악생성기</h3><p>쇼츠에 사용할 음악을 원하는 분위기와 스타일로 만들어보세요.</p></div>
+  <div class="workspace-grid music-workspace">
+    <div class="workspace-section">
+      <div class="workspace-section-head"><b>음악 설명</b><span>원하는 음악을 자유롭게 설명하세요.</span></div>
+      <textarea id="musicPrompt" class="large-textarea" maxlength="500" placeholder="예: 밝고 신나는 K-pop 스타일의 쇼츠용 음악"></textarea>
+      <div class="text-counter"><span>장르와 분위기를 함께 적으면 더 구체적으로 표현할 수 있습니다.</span><b id="musicPromptCount">0 / 500</b></div>
+      <div class="setting-grid">
+        <label class="setting-field"><span>장르</span><select id="musicGenre"><option value="k-pop" selected>K-pop</option><option value="pop">Pop</option><option value="hip-hop">Hip-hop</option><option value="rock">Rock</option><option value="electronic">Electronic</option><option value="lo-fi">Lo-fi</option><option value="cinematic">Cinematic</option><option value="other">기타</option></select></label>
+        <label class="setting-field"><span>분위기</span><select id="musicMood"><option value="bright" selected>밝음</option><option value="energetic">신남</option><option value="emotional">감성</option><option value="calm">차분함</option><option value="powerful">강렬함</option><option value="tension">긴장감</option></select></label>
+        <label class="setting-field"><span>길이</span><select id="musicDuration"><option value="15">15초</option><option value="30" selected>30초</option><option value="45">45초</option><option value="60">60초</option></select></label>
+        <label class="setting-field"><span>보컬</span><select id="musicVocal"><option value="instrumental" selected>Instrumental</option><option value="vocal">Vocal</option></select></label>
+      </div>
+    </div>
+    <div class="workspace-section settings-section">
+      <div class="workspace-section-head"><b>생성 준비</b><span id="musicGeneratorStatus">프롬프트를 입력하세요</span></div>
+      <div class="generator-summary"><div><span>GENRE</span><b id="musicGenreSummary">K-pop</b></div><div><span>MOOD</span><b id="musicMoodSummary">밝음</b></div><div><span>LENGTH</span><b id="musicDurationSummary">30초</b></div><div><span>VOCAL</span><b id="musicVocalSummary">Instrumental</b></div></div>
+      <div class="workspace-note">현재 프로젝트에는 실제 음악 생성 API가 연결되어 있지 않습니다. 생성 API 연결 후 이 화면에서 바로 음악을 만들 수 있습니다.</div>
+      <button id="generateMusicBtn" class="primary-btn tool-primary-btn">음악 생성하기 <span>→</span></button>
+    </div>
+  </div>
+  <div class="workspace-result music-generator-result">
+    <div class="music-result-main"><span class="result-label">MUSIC RESULT</span><b>생성된 음악</b><p id="musicGeneratorResultText">생성된 음악이 여기에 표시됩니다. 음악을 생성하면 바로 미리 들어볼 수 있습니다.</p><audio id="generatedMusicPreview" class="wide-audio" controls hidden></audio><div class="generated-music-meta" id="generatedMusicMeta" hidden><span id="generatedMusicDuration">-</span><span id="generatedMusicType">-</span></div></div>
+    <div class="workspace-actions"><a id="downloadMusicBtn" class="download-btn" hidden>음악 다운로드</a><button id="regenerateMusicBtn" class="small-btn" hidden>다시 생성</button><button id="clearGeneratedMusicBtn" class="small-btn" hidden>삭제</button></div>
+  </div>
+  <div class="workspace-section existing-music-section">
+    <div class="workspace-section-head"><b>기존 음악 사용</b><span>직접 가지고 있는 음악 파일을 불러와 사용할 수도 있습니다.</span></div>
+    <input id="audioInput" type="file" accept="audio/*" hidden />
+    <label class="large-dropzone compact-dropzone" for="audioInput"><span class="drop-icon">♫</span><strong>음악 파일을 끌어놓거나 클릭하세요</strong><small>MP3 · WAV · M4A 등 / 선택한 음악은 쇼츠 렌더링에 사용할 수 있습니다.</small></label>
+    <div class="selected-file" id="audioFileCard"><div><b id="audioName">선택하지 않음</b><span id="audioMeta">음악 파일을 선택하면 정보가 표시됩니다.</span></div><button id="clearAudio" class="small-btn" hidden>삭제</button></div>
+    <audio id="musicPreview" class="wide-audio" controls hidden></audio>
+    <div class="workspace-result"><div><span class="result-label">EXISTING MUSIC</span><b>기존 음악 준비 상태</b><p id="musicResultText">음악 파일을 선택하면 미리듣기와 파일 정보가 표시됩니다.</p></div><button id="applyMusicBtn" class="primary-btn tool-primary-btn">기존 음악 사용</button></div>
+  </div>
+</div>
+<div class="tool-panel" data-tool-panel="1" role="tabpanel" hidden>
           <div class="workspace-head">
             <div class="workspace-kicker">BEAT EDIT</div>
             <h3>비트 편집</h3>
