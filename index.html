@@ -81,7 +81,7 @@
           </div>
 
           <input id="position" type="hidden" value="center" />
-          <div class="controls">
+          <div class="basic-options" id="basicOptions"><div class="basic-options-title"><b>간단 설정</b><span>필요할 때만 변경하세요.</span></div><div class="controls">
             <div class="control-group">
               <label for="duration">쇼츠 길이</label>
               <select id="duration">
@@ -105,8 +105,9 @@
               <input id="overlayText" type="text" maxlength="60" placeholder="예: 오늘의 추천 장소" />
             </div>
           </div>
+          </div>
 
-          <button id="transcribeBtn" class="secondary-btn" disabled>2단계 · AI 자동 자막 생성</button>
+          <button id="transcribeBtn" class="secondary-btn" disabled hidden>AI 자동 자막 생성</button>
           <div class="subtitle-box" id="subtitleBox" hidden>
             <div class="subtitle-head"><b>AI 자동 자막</b><span id="subtitleStatus">대기 중</span></div>
             <div class="subtitle-options">
@@ -141,50 +142,69 @@
               <small>완성 결과도 이곳에서 확인할 수 있습니다.</small>
             </div>
           </div>
-          <a id="downloadBtn" class="download-btn" hidden>완성 영상 다운로드</a>
+          <div class="result-actions"><a id="downloadBtn" class="download-btn" hidden>MP4 다운로드</a><button id="resetResultBtn" class="small-btn" hidden>다시 만들기</button></div>
         </div>
       </div>
     </section>
 
     <section class="extra-page" id="extraFeaturesPage" hidden>
       <div class="section-heading">
-        <span>EXTRA FEATURES</span>
-        <h2>쇼츠 도구</g/h2>
-        <p>쇼츠 제작에 필요한 편집 및 AI 도구를 선택해서 사용할 수 있습니다.</p>
+        <span>SHORTS TOOLS</span>
+        <h2>쇼츠 도구</h2>
+        <p>필요할 때만 사용하는 선택 기능입니다. 기본 쇼츠 생성에는 필요하지 않습니다.</p>
       </div>
       <div class="extra-page-card" id="extraFeaturesMount">
-        <div class="editor-extra-panel" id="extraToolsPanel">
-          <div class="audio-row">
-            <input id="audioInput" type="file" accept="audio/*" hidden />
-            <label class="audio-btn" for="audioInput">♫ 배경음악 추가</label>
-            <span id="audioName">선택하지 않음</span>
-            <button id="clearAudio" class="small-btn" hidden>삭제</button>
-          </div>
-          <label class="beat-toggle">
-            <input id="beatEdit" type="checkbox" />
-            <span><b>비트 기반 자동 편집</b><small>음악의 박자를 분석해 영상 컷을 박자에 맞춥니다.</small></span>
-          </label>
-
-          <div class="voice-box" id="voiceBox">
-            <div class="voice-head"><b>AI 음성</b><span id="voiceStatus">텍스트를 입력하세요</span></div>
-            <textarea id="voiceText" maxlength="1000" placeholder="예: 오늘 소개할 장소는 분위기가 정말 좋습니다."></textarea>
-            <div class="voice-options">
-              <div><label for="voiceLanguage">언어</label><select id="voiceLanguage"><option value="ko" selected>한국어</option><option value="en">English</option><option value="es">Español</option><option value="pt">Português</option><option value="fr">Français</option></select></div>
-              <div><label for="voiceSpeaker">목소리</label><select id="voiceSpeaker"><option value="F1" selected>여성 1 · 차분한 톤</option><option value="F2">여성 2 · 밝은 톤</option><option value="F3">여성 3 · 선명한 톤</option><option value="F4">여성 4 · 또렷한 톤</option><option value="F5">여성 5 · 부드러운 톤</option><option value="M1">남성 1 · 활기찬 톤</option><option value="M2">남성 2 · 낮은 톤</option><option value="M3">남성 3 · 방송 톤</option><option value="M4">남성 4 · 중립 톤</option><option value="M5">남성 5 · 따뜻한 톤</option></select></div>
-              <div><label for="voiceSpeed">말하기 속도</label><input id="voiceSpeed" type="range" min="0.8" max="1.2" step="0.05" value="1" /><output id="voiceSpeedValue">1.00x</output></div>
-              <div><label for="voiceMix">완성 영상 오디오</label><select id="voiceMix"><option value="voice" selected>AI 음성만</option><option value="music">AI 음성 + 배경음악</option><option value="original">AI 음성 + 원본 오디오</option></select></div>
+        <div class="tool-card">
+          <details open>
+            <summary><b>배경음악</b><span>선택 기능</span></summary>
+            <div class="tool-card-body">
+              <div class="audio-row">
+                <input id="audioInput" type="file" accept="audio/*" hidden />
+                <label class="audio-btn" for="audioInput">♫ 배경음악 추가</label>
+                <span id="audioName">선택하지 않음</span>
+                <button id="clearAudio" class="small-btn" hidden>삭제</button>
+              </div>
             </div>
-            <div class="voice-actions"><button id="generateVoiceBtn" class="secondary-btn">AI 음성 생성</button><button id="clearVoice" class="small-btn" hidden>음성 삭제</button></div>
-            <audio id="voicePreview" controls hidden></audio>
-            <p class="voice-note">음성은 브라우저에서 생성됩니다. 첫 생성 시 AI 음성 모델을 다운로드합니다.</p>
-          </div>
+          </details>
+        </div>
 
+        <div class="tool-card">
+          <details>
+            <summary><b>비트 기반 자동 편집</b><span>선택 기능</span></summary>
+            <div class="tool-card-body">
+              <label class="beat-toggle">
+                <input id="beatEdit" type="checkbox" />
+                <span><b>비트에 맞춰 컷 편집</b><small>배경음악의 박자를 분석해 영상 컷을 맞춥니다.</small></span>
+              </label>
+            </div>
+          </details>
+        </div>
 
-          <div class="ai-tools-menu" id="aiToolsMenu">
-            <button type="button" id="aiToolsToggle" class="ai-tools-toggle" hidden>AI 소재 생성 <span>＋</span></button>
-            <div class="ai-tools-content" id="aiToolsContent">
-              <div class="ai-tools-title">쇼츠 제작에 필요한 이미지·영상을 추가로 생성할 수 있습니다.</div>
+        <div class="tool-card">
+          <details>
+            <summary><b>AI 음성</b><span>선택 기능</span></summary>
+            <div class="tool-card-body">
+              <div class="voice-box" id="voiceBox">
+                <div class="voice-head"><b>AI 음성</b><span id="voiceStatus">텍스트를 입력하세요</span></div>
+                <textarea id="voiceText" maxlength="1000" placeholder="예: 오늘 소개할 장소는 분위기가 정말 좋습니다."></textarea>
+                <div class="voice-options">
+                  <div><label for="voiceLanguage">언어</label><select id="voiceLanguage"><option value="ko" selected>한국어</option><option value="en">English</option><option value="es">Español</option><option value="pt">Português</option><option value="fr">Français</option></select></div>
+                  <div><label for="voiceSpeaker">목소리</label><select id="voiceSpeaker"><option value="F1" selected>여성 1 · 차분한 톤</option><option value="F2">여성 2 · 밝은 톤</option><option value="F3">여성 3 · 선명한 톤</option><option value="F4">여성 4 · 또렷한 톤</option><option value="F5">여성 5 · 부드러운 톤</option><option value="M1">남성 1 · 활기찬 톤</option><option value="M2">남성 2 · 낮은 톤</option><option value="M3">남성 3 · 방송 톤</option><option value="M4">남성 4 · 중립 톤</option><option value="M5">남성 5 · 따뜻한 톤</option></select></div>
+                  <div><label for="voiceSpeed">말하기 속도</label><input id="voiceSpeed" type="range" min="0.8" max="1.2" step="0.05" value="1" /><output id="voiceSpeedValue">1.00x</output></div>
+                  <div><label for="voiceMix">완성 영상 오디오</label><select id="voiceMix"><option value="voice" selected>AI 음성만</option><option value="music">AI 음성 + 배경음악</option><option value="original">AI 음성 + 원본 오디오</option></select></div>
+                </div>
+                <div class="voice-actions"><button id="generateVoiceBtn" class="secondary-btn">AI 음성 생성</button><button id="clearVoice" class="small-btn" hidden>음성 삭제</button></div>
+                <audio id="voicePreview" controls hidden></audio>
+                <p class="voice-note">음성은 브라우저에서 생성됩니다. 첫 생성 시 AI 음성 모델을 다운로드합니다.</p>
+              </div>
+            </div>
+          </details>
+        </div>
 
+        <div class="tool-card">
+          <details>
+            <summary><b>AI 이미지 생성</b><span>선택 기능</span></summary>
+            <div class="tool-card-body">
               <div class="image-box" id="imageBox">
                 <div class="image-head"><b>AI 이미지 생성</b><span id="imageStatus">준비됨</span></div>
                 <textarea id="imagePrompt" maxlength="1000" placeholder="예: 밤의 서울 골목, 네온사인, 시네마틱 조명, 세로 쇼츠용"></textarea>
@@ -204,9 +224,16 @@
                   <img id="generatedImage" alt="AI 생성 이미지" />
                   <a id="downloadImageBtn" class="download-btn" hidden>이미지 다운로드</a>
                 </div>
-                <p class="image-note">API 키는 이 브라우저의 로컬 저장소에만 저장합니다. 생성 비용과 한도는 연결한 API 서비스 정책을 따릅니다.</p>
+                <p class="image-note">API 키는 이 브라우저의 로컬 저장소에만 저장합니다.</p>
               </div>
+            </div>
+          </details>
+        </div>
 
+        <div class="tool-card">
+          <details>
+            <summary><b>AI 영상 생성</b><span>선택 기능</span></summary>
+            <div class="tool-card-body">
               <div class="video-ai-box" id="videoAiBox">
                 <div class="video-ai-head"><b>AI 영상 생성</b><span id="videoAiStatus">준비됨</span></div>
                 <textarea id="videoAiPrompt" maxlength="1000" placeholder="예: 비 오는 밤의 서울 골목을 천천히 걷는 장면, 네온사인, 시네마틱, 세로 영상"></textarea>
@@ -226,13 +253,12 @@
                   <video id="generatedAiVideo" controls playsinline></video>
                   <a id="downloadAiVideoBtn" class="download-btn" hidden>AI 영상 다운로드</a>
                 </div>
-                <p class="video-ai-note">생성 API를 연결해 텍스트에서 짧은 영상 장면을 만듭니다. 생성 비용과 처리 시간은 API 서비스에 따라 달라집니다.</p>
+                <p class="video-ai-note">텍스트로 짧은 영상 장면을 생성합니다. 생성 비용과 처리 시간은 연결한 API 서비스에 따라 달라집니다.</p>
               </div>
             </div>
-          </div>
+          </details>
         </div>
-
-</div>
+      </div>
     </section>
 
     <!-- 개발 로드맵 -->
