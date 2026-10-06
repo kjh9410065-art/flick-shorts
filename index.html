@@ -21,7 +21,7 @@
     </nav>
     <button class="nav-cta" data-scroll="#editor">쇼츠 만들기</button>
   </header>
-  <div class="app-tabs" role="tablist" aria-label="FLiCK Shorts 기능">
+  <div class="app-tabs" id="appTabs" role="tablist" aria-label="FLiCK Shorts 기능" hidden>
     <button type="button" class="app-tab active" id="shortsAutoTab" role="tab" aria-selected="true">쇼츠 자동생성</button>
     <button type="button" class="app-tab" id="extraFeaturesTab" role="tab" aria-selected="false">추가 기능</button>
   </div>
@@ -35,7 +35,7 @@
         <p>영상을 업로드하고 길이와 스타일만 선택하세요.<br />브라우저에서 바로 9:16 쇼츠를 제작합니다.</p>
         <div class="hero-actions">
           <button class="primary-btn" data-scroll="#editor">쇼츠 만들기 <span>→</span></button>
-          <button class="ghost-btn" data-scroll="#roadmap">사용방법</button>
+          <button class="ghost-btn" data-scroll="#editor">사용방법</button>
         </div>
         <div class="trust-row"><span>✓ 설치 필요 없음</span><span>✓ 내 브라우저에서 처리</span><span>✓ 9:16 출력</span></div>
       </div>
@@ -65,10 +65,8 @@
       <div class="section-heading">
         <span>SHORTS MAKER</span>
         <h2>영상 하나로 바로 시작하세요.</h2>
-        <p>현재 버전은 기본 자동 편집부터 시작합니다. 영상 파일은 서버로 업로드하지 않고 브라우저에서 처리합니다.</p>
+        <p>영상을 하나 올리고 쇼츠 만들기를 누르면 9:16 변환·자동 컷·자동 자막·MP4 출력까지 처리합니다. 영상 파일은 서버로 업로드하지 않고 브라우저에서 처리합니다.</p>
       </div>
-
-      <div class="stage-track" aria-label="1단계 제작 과정"><div class="stage active"><i>1</i><span>영상 업로드</span></div><div class="stage-line"></div><div class="stage"><i>2</i><span>9:16 변환</span></div><div class="stage-line"></div><div class="stage"><i>3</i><span>자동 컷</span></div><div class="stage-line"></div><div class="stage"><i>4</i><span>음악</span></div><div class="stage-line"></div><div class="stage"><i>5</i><span>MP4</span></div></div>
 
       <div class="editor-card">
         <div class="upload-panel">
@@ -87,45 +85,31 @@
             <button id="removeVideo" class="small-btn">삭제</button>
           </div>
 
+          <input id="position" type="hidden" value="center" />
           <div class="controls">
             <div class="control-group">
               <label for="duration">쇼츠 길이</label>
               <select id="duration">
+                <option value="0" selected>자동</option>
                 <option value="15">15초</option>
-                <option value="30" selected>30초</option>
+                <option value="30">30초</option>
                 <option value="45">45초</option>
-                <option value="0">원본 길이</option>
-              </select>
-            </div>
-            <div class="control-group">
-              <label for="position">가로 영상 위치</label>
-              <select id="position">
-                <option value="center" selected>가운데</option>
-                <option value="left">왼쪽</option>
-                <option value="right">오른쪽</option>
               </select>
             </div>
             <div class="control-group">
               <label for="cutMode">자동 컷</label>
-              <select id="cutMode"><option value="smart" selected>자동 구간 선택</option><option value="start">처음부터</option><option value="center">가운데 구간</option><option value="end">마지막 구간</option></select>
+              <select id="cutMode">
+                <option value="smart" selected>자동 구간 선택</option>
+                <option value="start">처음부터</option>
+                <option value="center">가운데 구간</option>
+                <option value="end">마지막 구간</option>
+              </select>
             </div>
             <div class="control-group">
-              <label for="overlayText">화면 문구</label>
+              <label for="overlayText">화면 문구 <span class="optional-label">선택</span></label>
               <input id="overlayText" type="text" maxlength="60" placeholder="예: 오늘의 추천 장소" />
             </div>
           </div>
-
-        <div class="editor-extra-panel" id="extraToolsPanel">
-          <div class="audio-row">
-            <input id="audioInput" type="file" accept="audio/*" hidden />
-            <label class="audio-btn" for="audioInput">♫ 배경음악 추가</label>
-            <span id="audioName">선택하지 않음</span>
-            <button id="clearAudio" class="small-btn" hidden>삭제</button>
-          </div>
-          <label class="beat-toggle">
-            <input id="beatEdit" type="checkbox" />
-            <span><b>3단계 · 비트 기반 자동 편집</b><small>음악의 박자를 분석해 영상 컷을 박자에 맞춥니다.</small></span>
-          </label>
 
           <button id="transcribeBtn" class="secondary-btn" disabled>2단계 · AI 자동 자막 생성</button>
           <div class="subtitle-box" id="subtitleBox" hidden>
@@ -142,6 +126,50 @@
             </div>
             <div class="subtitle-list" id="subtitleList"></div>
           </div>
+
+          <button id="renderBtn" class="primary-btn render-btn" disabled>쇼츠 만들기 <span>→</span></button>
+          <div class="progress-wrap" id="progressWrap" hidden>
+            <div class="progress-head"><span id="progressText">준비 중...</span><b id="progressPercent">0%</b></div>
+            <div class="progress-bar"><i id="progressBar"></i></div>
+          </div>
+          <p class="notice" id="status">영상이 브라우저에만 보관됩니다. 첫 렌더링에는 FFmpeg 엔진 다운로드 시간이 필요할 수 있습니다.</p>
+        </div>
+
+        <div class="preview-panel">
+          <div class="preview-head"><b>미리보기</b><span id="previewRatio">9:16</span></div>
+          <div class="phone-preview">
+            <video id="previewVideo" controls playsinline></video>
+            <div class="preview-overlay" id="previewOverlay"></div>
+            <div class="empty-preview" id="emptyPreview">
+              <span>▶</span>
+              <b>영상을 업로드하세요</b>
+              <small>완성 결과도 이곳에서 확인할 수 있습니다.</small>
+            </div>
+          </div>
+          <a id="downloadBtn" class="download-btn" hidden>완성 영상 다운로드</a>
+        </div>
+      </div>
+    </section>
+
+    <section class="extra-page" id="extraFeaturesPage" hidden>
+      <div class="section-heading">
+        <span>EXTRA FEATURES</span>
+        <h2>추가 기능</h2>
+        <p>기본 쇼츠 자동생성에 필요한 기능만 선택해서 사용할 수 있습니다.</p>
+      </div>
+      <div class="extra-page-card" id="extraFeaturesMount">
+        <div class="editor-extra-panel" id="extraToolsPanel">
+          <div class="audio-row">
+            <input id="audioInput" type="file" accept="audio/*" hidden />
+            <label class="audio-btn" for="audioInput">♫ 배경음악 추가</label>
+            <span id="audioName">선택하지 않음</span>
+            <button id="clearAudio" class="small-btn" hidden>삭제</button>
+          </div>
+          <label class="beat-toggle">
+            <input id="beatEdit" type="checkbox" />
+            <span><b>3단계 · 비트 기반 자동 편집</b><small>음악의 박자를 분석해 영상 컷을 박자에 맞춥니다.</small></span>
+          </label>
+
           <div class="voice-box" id="voiceBox">
             <div class="voice-head"><b>4단계 · AI 음성</b><span id="voiceStatus">텍스트를 입력하세요</span></div>
             <textarea id="voiceText" maxlength="1000" placeholder="예: 오늘 소개할 장소는 분위기가 정말 좋습니다."></textarea>
@@ -208,37 +236,8 @@
             </div>
           </div>
         </div>
-          <button id="renderBtn" class="primary-btn render-btn" disabled>쇼츠 만들기 <span>→</span></button>
-          <div class="progress-wrap" id="progressWrap" hidden>
-            <div class="progress-head"><span id="progressText">준비 중...</span><b id="progressPercent">0%</b></div>
-            <div class="progress-bar"><i id="progressBar"></i></div>
-          </div>
-          <p class="notice" id="status">영상이 브라우저에만 보관됩니다. 첫 렌더링에는 FFmpeg 엔진 다운로드 시간이 필요할 수 있습니다.</p>
-        </div>
 
-        <div class="preview-panel">
-          <div class="preview-head"><b>미리보기</b><span id="previewRatio">9:16</span></div>
-          <div class="phone-preview">
-            <video id="previewVideo" controls playsinline></video>
-            <div class="preview-overlay" id="previewOverlay"></div>
-            <div class="empty-preview" id="emptyPreview">
-              <span>▶</span>
-              <b>영상을 업로드하세요</b>
-              <small>완성 결과도 이곳에서 확인할 수 있습니다.</small>
-            </div>
-          </div>
-          <a id="downloadBtn" class="download-btn" hidden>완성 영상 다운로드</a>
-        </div>
-      </div>
-    </section>
-
-    <section class="extra-page" id="extraFeaturesPage" hidden>
-      <div class="section-heading">
-        <span>EXTRA FEATURES</span>
-        <h2>추가 기능</h2>
-        <p>기본 쇼츠 자동생성에 필요한 기능만 선택해서 사용할 수 있습니다.</p>
-      </div>
-      <div class="extra-page-card" id="extraFeaturesMount"></div>
+</div>
     </section>
 
     <!-- 개발 로드맵 -->
