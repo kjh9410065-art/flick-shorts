@@ -149,10 +149,18 @@
     <section class="extra-page" id="extraFeaturesPage" hidden>
       <div class="section-heading">
         <span>SHORTS TOOLS</span>
-        <h2>쇼츠 도구</h2>
-        <p>필요할 때만 사용하는 선택 기능입니다. 기본 쇼츠 생성에는 필요하지 않습니다.</p>
+        <h2>필요한 기능을 하나씩 선택하세요.</h2>
+        <p>원하는 기능만 열어서 작업할 수 있습니다.</p>
+      </div>
+      <div class="tool-tabs" role="tablist" aria-label="쇼츠 도구">
+          <button type="button" class="tool-tab active" data-tool-tab="0" role="tab" aria-selected="true">배경음악</button>
+          <button type="button" class="tool-tab" data-tool-tab="1" role="tab" aria-selected="false">비트 편집</button>
+          <button type="button" class="tool-tab" data-tool-tab="2" role="tab" aria-selected="false">AI 음성</button>
+          <button type="button" class="tool-tab" data-tool-tab="3" role="tab" aria-selected="false">AI 이미지</button>
+          <button type="button" class="tool-tab" data-tool-tab="4" role="tab" aria-selected="false">AI 영상</button>
       </div>
       <div class="extra-page-card" id="extraFeaturesMount">
+          <div class="tool-panel active" data-tool-panel="0" role="tabpanel">
         <div class="tool-card">
           <details open>
             <summary><b>배경음악</b><span>선택 기능</span></summary>
@@ -166,7 +174,8 @@
             </div>
           </details>
         </div>
-
+          </div>
+<div class="tool-panel" data-tool-panel="1" role="tabpanel" hidden>
         <div class="tool-card">
           <details>
             <summary><b>비트 기반 자동 편집</b><span>선택 기능</span></summary>
@@ -178,7 +187,8 @@
             </div>
           </details>
         </div>
-
+          </div>
+<div class="tool-panel" data-tool-panel="2" role="tabpanel" hidden>
         <div class="tool-card">
           <details>
             <summary><b>AI 음성</b><span>선택 기능</span></summary>
@@ -199,7 +209,8 @@
             </div>
           </details>
         </div>
-
+          </div>
+<div class="tool-panel" data-tool-panel="3" role="tabpanel" hidden>
         <div class="tool-card">
           <details>
             <summary><b>AI 이미지 생성</b><span>선택 기능</span></summary>
@@ -228,7 +239,8 @@
             </div>
           </details>
         </div>
-
+          </div>
+<div class="tool-panel" data-tool-panel="4" role="tabpanel" hidden>
         <div class="tool-card">
           <details>
             <summary><b>AI 영상 생성</b><span>선택 기능</span></summary>
@@ -257,10 +269,11 @@
             </div>
           </details>
         </div>
+          </div>
       </div>
     </section>
 
-    <!-- 개발 로드맵 -->
+<!-- 개발 로드맵 -->
     <section class="roadmap-section" id="roadmap" hidden>
       <div class="section-heading center">
         <span>DEVELOPMENT ROADMAP</span>
