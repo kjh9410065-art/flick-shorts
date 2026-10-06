@@ -646,6 +646,8 @@ async function generateImage() {
     const objectUrl = URL.createObjectURL(blob);
     generatedImage.src = objectUrl;
     generatedImage.dataset.objectUrl = objectUrl;
+    generatedImage.hidden = false;
+    document.getElementById("imageEmptyPreview")?.setAttribute("hidden", "");
     imageResult.hidden = false;
     clearImage.hidden = false;
     downloadImageBtn.href = objectUrl;
@@ -671,6 +673,8 @@ function clearGeneratedImage() {
   if (oldUrl) URL.revokeObjectURL(oldUrl);
   generatedImage.removeAttribute("src");
   generatedImage.dataset.objectUrl = "";
+  generatedImage.hidden = true;
+  document.getElementById("imageEmptyPreview")?.removeAttribute("hidden");
   imageResult.hidden = true;
   downloadImageBtn.hidden = true;
   clearImage.hidden = true;
@@ -752,6 +756,8 @@ async function generateAiVideo() {
     if (!videoUrl) throw new Error("video url missing");
 
     generatedAiVideo.src = videoUrl;
+    generatedAiVideo.hidden = false;
+    document.getElementById("videoEmptyPreview")?.setAttribute("hidden", "");
     generatedAiVideo.load();
     videoAiResult.hidden = false;
     clearVideoAi.hidden = false;
@@ -776,6 +782,8 @@ async function generateAiVideo() {
 function clearGeneratedAiVideo() {
   generatedAiVideo.pause();
   generatedAiVideo.removeAttribute("src");
+  generatedAiVideo.hidden = true;
+  document.getElementById("videoEmptyPreview")?.removeAttribute("hidden");
   generatedAiVideo.load();
   videoAiResult.hidden = true;
   downloadAiVideoBtn.hidden = true;
