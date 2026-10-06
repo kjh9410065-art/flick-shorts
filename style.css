@@ -360,3 +360,10 @@ footer { max-width:1180px; margin:auto; padding:28px 24px 45px; display:flex; ju
 /* 음악생성기 가사 입력 영역을 강조합니다. */
 .lyrics-head{margin-top:22px}
 .lyrics-textarea{min-height:150px}
+
+/* 음악 장르를 여러 개 선택할 수 있는 칩 UI입니다. */
+.music-genre-field>span small{font-size:11px;color:#918d9d;font-weight:500;margin-left:6px}
+.multi-select-options{display:flex;flex-wrap:wrap;gap:8px;margin-top:8px}
+.genre-chip{border:1px solid var(--line,#e9e7f2);background:#fff;border-radius:999px;padding:9px 13px;font:inherit;font-size:13px;cursor:pointer;transition:.18s}
+.genre-chip.active{background:#6d55e8;color:#fff;border-color:#6d55e8}
+.genre-chip:hover{transform:translateY(-1px)}
