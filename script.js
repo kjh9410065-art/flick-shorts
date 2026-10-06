@@ -1057,7 +1057,7 @@ function showEditorTab(tab, pushHistory = true) {
   if (pushHistory) history.pushState({ page: showExtra ? "extra" : "editor" }, "", showExtra ? "#extra" : "#editor");
 }
 
-function openEditor() {
+function openEditor(pushHistory = true) {
   const hero = document.querySelector(".hero");
   const editor = document.querySelector("#editor");
   const roadmap = document.querySelector("#roadmap");
@@ -1070,7 +1070,7 @@ function openEditor() {
   if (tabs) tabs.hidden = false;
   document.body.classList.add("editor-open");
   showEditorTab("auto", false);
-  history.pushState({ page: "editor" }, "", "#editor");
+  if (pushHistory) history.pushState({ page: "editor" }, "", "#editor");
 }
 
 function showLanding(pushHistory = true) {
@@ -1116,7 +1116,7 @@ if (brandButton) {
 
 window.addEventListener("popstate", () => {
   if (window.location.hash === "#extra") {
-    openEditor();
+    openEditor(false);
     showEditorTab("extra", false);
   } else if (window.location.hash === "#editor") {
     openEditor();
@@ -1126,8 +1126,8 @@ window.addEventListener("popstate", () => {
 });
 
 if (window.location.hash === "#extra") {
-  openEditor();
+  openEditor(false);
   showEditorTab("extra", false);
 } else if (window.location.hash === "#editor") {
-  openEditor();
+  openEditor(false);
 }
