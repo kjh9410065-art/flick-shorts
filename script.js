@@ -99,11 +99,6 @@ function formatBytes(bytes) {
   return (bytes / 1024 ** index).toFixed(index ? 1 : 0) + " " + units[index];
 }
 
-// 현재 개발 단계를 UI에 반영합니다.
-function setStage(activeNumber) {
-  stages.forEach((stage, index) => stage.classList.toggle("active", index < activeNumber));
-}
-
 // 영상 파일을 선택하고 메타데이터를 읽습니다.
 function setVideo(file) {
   if (!file || !file.type.startsWith("video/")) {
