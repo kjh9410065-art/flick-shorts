@@ -137,14 +137,14 @@ function setVideo(file) {
     renderBtn.disabled = false;
     transcribeBtn.disabled = false;
     setStage(1);
-    setStatus("영상이 준비되었습니다. 자동 자막과 비트 편집을 선택할 수 있습니다.");
+    setStatus("영상이 준비되었습니다. 쇼츠 만들기를 눌러 자동 생성하세요.");
   };
   probe.onerror = () => {
     URL.revokeObjectURL(metadataUrl);
     renderBtn.disabled = false;
     transcribeBtn.disabled = false;
     setStage(1);
-    setStatus("영상이 준비되었습니다. 옵션을 선택하세요.");
+    setStatus("영상이 준비되었습니다. 쇼츠 만들기를 눌러 자동 생성하세요.");
   };
   probe.src = metadataUrl;
   updateOverlay();
@@ -153,7 +153,8 @@ function setVideo(file) {
 // 선택한 쇼츠 길이를 계산합니다.
 function getTargetDuration() {
   const requested = Number(durationSelect.value);
-  if (!sourceDuration || requested === 0) return sourceDuration || 0;
+  if (!sourceDuration) return 0;
+  if (requested === 0) return Math.min(30, sourceDuration);
   return Math.min(requested, sourceDuration);
 }
 
@@ -274,8 +275,9 @@ function escapeHtml(text) {
 }
 
 // 선택한 영상의 음성을 Whisper로 분석합니다.
-async function generateSubtitles() {
+async function generateSubtitles(options = {}) {
   if (!videoFile) return;
+  const silent = Boolean(options.silent);
   transcribeBtn.disabled = true;
   renderBtn.disabled = true;
   subtitleBox.hidden = false;
@@ -311,13 +313,18 @@ async function generateSubtitles() {
     subtitleBox.hidden = false;
     subtitleStatus.textContent = subtitleSegments.length ? `${subtitleSegments.length}개 생성` : "음성 없음";
     setStage(2);
-    setProgress(100, "자동 자막 생성 완료");
-    setStatus(subtitleSegments.length ? "자동 자막이 생성되었습니다. 문구를 수정한 뒤 쇼츠 만들기를 누르세요." : "인식된 음성이 없습니다.");
+    if (!silent) {
+      setProgress(100, "자동 자막 생성 완료");
+      setStatus(subtitleSegments.length ? "자동 자막이 생성되었습니다." : "인식된 음성이 없습니다.");
+    }
   } catch (error) {
     console.error(error);
-    subtitleStatus.textContent = "실패";
-    setStatus("AI 자동 자막 생성에 실패했습니다.");
-    setProgress(0, "자막 생성 실패");
+    subtitleStatus.textContent = silent ? "음성 없음" : "실패";
+    if (!silent) {
+      setStatus("AI 자동 자막 생성에 실패했습니다.");
+      setProgress(0, "자막 생성 실패");
+    }
+    if (silent) subtitleSegments = [];
   } finally {
     transcribeBtn.disabled = !videoFile;
     renderBtn.disabled = !videoFile;
@@ -805,8 +812,15 @@ async function renderShorts() {
       try { await ffmpeg.deleteFile(name); } catch {}
     }
 
+    setProgress(12, "영상 분석 중...");
     await ffmpeg.writeFile("input.mp4", await fetchFile(videoFile));
     if (audioFile) await ffmpeg.writeFile("music", await fetchFile(audioFile));
+
+    // 사용자가 별도로 자막 생성을 누르지 않아도 음성이 있으면 자동으로 자막을 만듭니다.
+    if (!subtitleSegments.length) {
+      setProgress(18, "자동 자막 생성 중...");
+      await generateSubtitles({ silent: true });
+    }
 
     if (subtitleSegments.length) {
       setProgress(15, "자막 폰트를 준비하는 중...");
@@ -892,7 +906,7 @@ async function renderShorts() {
     if (targetDuration > 0) args.push("-t", String(targetDuration));
     args.push("-movflags", "+faststart", "-y", "output.mp4");
 
-    setProgress(25, beatSegments.length > 1 ? "비트에 맞춰 컷을 이어 붙이는 중..." : "9:16 변환, 자동 컷, 음악, 자막을 적용하는 중...");
+    setProgress(25, beatSegments.length > 1 ? "비트에 맞춰 컷을 이어 붙이는 중..." : "9:16 변환 및 MP4 렌더링 중...");
     await ffmpeg.exec(args);
 
     setProgress(96, "완성 파일을 준비하는 중...");
@@ -1024,33 +1038,53 @@ removeVideo.addEventListener("click", () => {
 });
 
 // 상단 버튼을 편집기로 부드럽게 이동합니다.
+function showEditorTab(tab, pushHistory = true) {
+  const editor = document.querySelector("#editor");
+  const extra = document.querySelector("#extraFeaturesPage");
+  const autoTab = document.querySelector("#shortsAutoTab");
+  const extraTab = document.querySelector("#extraFeaturesTab");
+  if (!editor || !extra || !autoTab || !extraTab) return;
+
+  const showExtra = tab === "extra";
+  editor.hidden = showExtra;
+  extra.hidden = !showExtra;
+  autoTab.classList.toggle("active", !showExtra);
+  extraTab.classList.toggle("active", showExtra);
+  autoTab.setAttribute("aria-selected", String(!showExtra));
+  extraTab.setAttribute("aria-selected", String(showExtra));
+  window.scrollTo({ top: 0, behavior: "instant" });
+
+  if (pushHistory) history.pushState({ page: showExtra ? "extra" : "editor" }, "", showExtra ? "#extra" : "#editor");
+}
+
 function openEditor() {
   const hero = document.querySelector(".hero");
   const editor = document.querySelector("#editor");
   const roadmap = document.querySelector("#roadmap");
   const nav = document.querySelector("#siteNav");
+  const tabs = document.querySelector("#appTabs");
   if (!editor) return;
   hero?.classList.add("page-hidden");
-  editor.hidden = false;
-  editor.classList.add("page-active");
   if (roadmap) roadmap.hidden = true;
   if (nav) nav.classList.add("visible");
+  if (tabs) tabs.hidden = false;
   document.body.classList.add("editor-open");
+  showEditorTab("auto", false);
   history.pushState({ page: "editor" }, "", "#editor");
-  window.scrollTo({ top: 0, behavior: "instant" });
 }
 
 function showLanding(pushHistory = true) {
   const hero = document.querySelector(".hero");
   const editor = document.querySelector("#editor");
+  const extra = document.querySelector("#extraFeaturesPage");
   const roadmap = document.querySelector("#roadmap");
   const nav = document.querySelector("#siteNav");
+  const tabs = document.querySelector("#appTabs");
   hero?.classList.remove("page-hidden");
-  if (editor) {
-    editor.hidden = true;
-    editor.classList.remove("page-active");
-  }
+  if (editor) editor.hidden = true;
+  if (extra) extra.hidden = true;
   if (roadmap) roadmap.hidden = true;
+  if (tabs) tabs.hidden = true;
   nav?.classList.remove("visible");
   document.body.classList.remove("editor-open");
   if (pushHistory) history.pushState({ page: "landing" }, "", window.location.pathname);
@@ -1069,6 +1103,9 @@ document.querySelectorAll("[data-scroll]").forEach((button) => {
   });
 });
 
+document.querySelector("#shortsAutoTab")?.addEventListener("click", () => showEditorTab("auto"));
+document.querySelector("#extraFeaturesTab")?.addEventListener("click", () => showEditorTab("extra"));
+
 const brandButton = document.querySelector(".brand");
 if (brandButton) {
   brandButton.addEventListener("click", (event) => {
@@ -1078,8 +1115,19 @@ if (brandButton) {
 }
 
 window.addEventListener("popstate", () => {
-  if (window.location.hash === "#editor") openEditor();
-  else showLanding(false);
+  if (window.location.hash === "#extra") {
+    openEditor();
+    showEditorTab("extra", false);
+  } else if (window.location.hash === "#editor") {
+    openEditor();
+  } else {
+    showLanding(false);
+  }
 });
 
-if (window.location.hash === "#editor") openEditor();
+if (window.location.hash === "#extra") {
+  openEditor();
+  showEditorTab("extra", false);
+} else if (window.location.hash === "#editor") {
+  openEditor();
+}
