@@ -1105,6 +1105,21 @@ document.querySelectorAll("[data-scroll]").forEach((button) => {
   });
 });
 
+document.querySelectorAll("[data-tool-tab]").forEach((tab) => {
+  tab.addEventListener("click", () => {
+    const index = tab.dataset.toolTab;
+    document.querySelectorAll("[data-tool-tab]").forEach((item) => {
+      const active = item.dataset.toolTab === index;
+      item.classList.toggle("active", active);
+      item.setAttribute("aria-selected", String(active));
+    });
+    document.querySelectorAll("[data-tool-panel]").forEach((panel) => {
+      panel.hidden = panel.dataset.toolPanel !== index;
+      panel.classList.toggle("active", panel.dataset.toolPanel === index);
+    });
+  });
+});
+
 document.querySelector("#shortsAutoTab")?.addEventListener("click", () => showEditorTab("auto"));
 document.querySelector("#extraFeaturesTab")?.addEventListener("click", () => showEditorTab("extra"));
 
