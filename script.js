@@ -1127,8 +1127,6 @@ function showLanding(pushHistory = true) {
 // 상세 쇼츠 도구의 보조 인터랙션을 연결합니다.
 // 음악 생성기 UI 요소를 가져옵니다.
 const musicPrompt = document.getElementById("musicPrompt");
-const musicGenre = document.getElementById("musicGenre");
-const musicMood = document.getElementById("musicMood");
 const musicDuration = document.getElementById("musicDuration");
 const musicVocal = document.getElementById("musicVocal");
 const musicPromptCount = document.getElementById("musicPromptCount");
@@ -1147,13 +1145,8 @@ const generateMusicBtn = document.getElementById("generateMusicBtn");
 
 // 선택값을 생성기 요약 영역에 반영합니다.
 function updateMusicGeneratorSummary() {
-  const genreSummary = document.getElementById("musicGenreSummary");
-  const moodSummary = document.getElementById("musicMoodSummary");
   const durationSummary = document.getElementById("musicDurationSummary");
   const vocalSummary = document.getElementById("musicVocalSummary");
-  const genres = [...document.querySelectorAll(".genre-chip.active")].map((chip) => chip.textContent.trim());
-  if (genreSummary) genreSummary.textContent = genres.length ? genres.join(" + ") : "선택 안 함";
-  if (moodSummary) moodSummary.textContent = musicMood?.selectedOptions[0]?.textContent || "-";
   if (durationSummary) durationSummary.textContent = (musicDuration?.value || "-") + "초";
   if (vocalSummary) vocalSummary.textContent = musicVocal?.selectedOptions[0]?.textContent || "-";
 }
@@ -1166,8 +1159,7 @@ async function generateMusic() {
     musicPrompt?.focus();
     return;
   }
-  const selectedGenres = [...document.querySelectorAll(".genre-chip.active")].map((chip) => chip.dataset.genre);
-  if (musicGeneratorStatus) musicGeneratorStatus.textContent = musicVocal?.value === "vocal" && musicLyrics?.value.trim() ? "가사 포함 · " + selectedGenres.join(", ") + " · API 연결 대기" : "API 연결 대기";
+  if (musicGeneratorStatus) musicGeneratorStatus.textContent = musicVocal?.value === "vocal" && musicLyrics?.value.trim() ? "가사 포함 · API 연결 대기" : "API 연결 대기";
   if (musicGeneratorResultText) musicGeneratorResultText.textContent = "현재 프로젝트에는 실제 음악 생성 API가 연결되어 있지 않습니다.";
   setStatus("음악 생성 API 연결이 필요합니다.");
 }
@@ -1194,12 +1186,7 @@ musicPrompt?.addEventListener("input", () => {
   if (musicPromptCount) musicPromptCount.textContent = musicPrompt.value.length + " / 500";
   if (musicGeneratorStatus) musicGeneratorStatus.textContent = musicPrompt.value.trim() ? "생성 가능" : "프롬프트를 입력하세요";
 });
-[musicMood, musicDuration, musicVocal].forEach((input) => input?.addEventListener("change", updateMusicGeneratorSummary));
-document.querySelectorAll(".genre-chip").forEach((chip) => chip.addEventListener("click", () => {
-  chip.classList.toggle("active");
-  if (!document.querySelector(".genre-chip.active")) chip.classList.add("active");
-  updateMusicGeneratorSummary();
-}));
+[musicDuration, musicVocal].forEach((input) => input?.addEventListener("change", updateMusicGeneratorSummary));
 generateMusicBtn?.addEventListener("click", generateMusic);
 regenerateMusicBtn?.addEventListener("click", generateMusic);
 clearGeneratedMusicBtn?.addEventListener("click", clearGeneratedMusic);
