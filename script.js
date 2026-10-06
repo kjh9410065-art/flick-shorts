@@ -1151,7 +1151,8 @@ function updateMusicGeneratorSummary() {
   const moodSummary = document.getElementById("musicMoodSummary");
   const durationSummary = document.getElementById("musicDurationSummary");
   const vocalSummary = document.getElementById("musicVocalSummary");
-  if (genreSummary) genreSummary.textContent = musicGenre?.selectedOptions[0]?.textContent || "-";
+  const genres = [...document.querySelectorAll(".genre-chip.active")].map((chip) => chip.textContent.trim());
+  if (genreSummary) genreSummary.textContent = genres.length ? genres.join(" + ") : "선택 안 함";
   if (moodSummary) moodSummary.textContent = musicMood?.selectedOptions[0]?.textContent || "-";
   if (durationSummary) durationSummary.textContent = (musicDuration?.value || "-") + "초";
   if (vocalSummary) vocalSummary.textContent = musicVocal?.selectedOptions[0]?.textContent || "-";
@@ -1165,7 +1166,8 @@ async function generateMusic() {
     musicPrompt?.focus();
     return;
   }
-  if (musicGeneratorStatus) musicGeneratorStatus.textContent = musicVocal?.value === "vocal" && musicLyrics?.value.trim() ? "가사 포함 · API 연결 대기" : "API 연결 대기";
+  const selectedGenres = [...document.querySelectorAll(".genre-chip.active")].map((chip) => chip.dataset.genre);
+  if (musicGeneratorStatus) musicGeneratorStatus.textContent = musicVocal?.value === "vocal" && musicLyrics?.value.trim() ? "가사 포함 · " + selectedGenres.join(", ") + " · API 연결 대기" : "API 연결 대기";
   if (musicGeneratorResultText) musicGeneratorResultText.textContent = "현재 프로젝트에는 실제 음악 생성 API가 연결되어 있지 않습니다.";
   setStatus("음악 생성 API 연결이 필요합니다.");
 }
@@ -1192,7 +1194,12 @@ musicPrompt?.addEventListener("input", () => {
   if (musicPromptCount) musicPromptCount.textContent = musicPrompt.value.length + " / 500";
   if (musicGeneratorStatus) musicGeneratorStatus.textContent = musicPrompt.value.trim() ? "생성 가능" : "프롬프트를 입력하세요";
 });
-[musicGenre, musicMood, musicDuration, musicVocal].forEach((input) => input?.addEventListener("change", updateMusicGeneratorSummary));
+[musicMood, musicDuration, musicVocal].forEach((input) => input?.addEventListener("change", updateMusicGeneratorSummary));
+document.querySelectorAll(".genre-chip").forEach((chip) => chip.addEventListener("click", () => {
+  chip.classList.toggle("active");
+  if (!document.querySelector(".genre-chip.active")) chip.classList.add("active");
+  updateMusicGeneratorSummary();
+}));
 generateMusicBtn?.addEventListener("click", generateMusic);
 regenerateMusicBtn?.addEventListener("click", generateMusic);
 clearGeneratedMusicBtn?.addEventListener("click", clearGeneratedMusic);
