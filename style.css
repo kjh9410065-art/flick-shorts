@@ -343,3 +343,16 @@ footer { max-width:1180px; margin:auto; padding:28px 24px 45px; display:flex; ju
   .beat-summary{grid-template-columns:1fr 1fr 1fr}.ai-result-panel{min-height:360px}.large-image-result,.large-video-result{min-height:280px}
   .api-key-field{flex-direction:column}.api-key-field .small-btn{width:100%}.voice-result .wide-audio{max-width:none}.selected-file{align-items:flex-start}
 }
+
+/* 음악생성기 전용 상세 UI */
+.generator-summary{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:10px;margin:18px 0}
+.generator-summary>div{padding:14px;border:1px solid var(--line,#e9e7f2);border-radius:14px;background:#faf9fd}
+.generator-summary span{display:block;font-size:10px;letter-spacing:.12em;color:#8b8798;margin-bottom:6px}
+.generator-summary b{display:block;font-size:14px}
+.music-generator-result{align-items:flex-end}
+.music-result-main{min-width:0;flex:1}
+.generated-music-meta{display:flex;gap:8px;margin-top:10px}
+.generated-music-meta span{padding:6px 9px;border-radius:999px;background:#f1eff7;font-size:12px}
+.existing-music-section{margin-top:18px}
+@media (max-width:900px){.generator-summary{grid-template-columns:repeat(2,minmax(0,1fr))}}
+@media (max-width:640px){.generator-summary{grid-template-columns:1fr 1fr}.music-generator-result{align-items:stretch;flex-direction:column}}
