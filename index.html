@@ -95,13 +95,11 @@
               <label for="cutMode">자동 컷 기준</label>
               <select id="cutMode">
                 <option value="auto" selected>자동</option>
-                <option value="seconds">초 단위</option>
-                <option value="minutes">분 단위</option>
+                <option value="manual">시간 선택</option>
               </select>
-              <div class="cut-offset-control" id="cutOffsetControl" hidden>
-                <input id="cutOffsetValue" type="number" min="0" step="1" value="0" inputmode="numeric" aria-label="자동 컷 시작 위치" />
-                <span id="cutOffsetUnit">초부터</span>
-              </div>
+              <select id="cutOffsetSelect" class="cut-offset-select" aria-label="자동 컷 시작 위치" hidden>
+                <option value="0">00:00부터</option>
+              </select>
             </div>
             <div class="control-group">
               <label for="overlayText">화면 문구 <span class="optional-label">선택</span></label>
