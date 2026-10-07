@@ -18,9 +18,7 @@ const durationSelect = document.getElementById("duration");
 const positionSelect = document.getElementById("position");
 const cutModeSelect = document.getElementById("cutMode");
 const cutModeGroup = document.getElementById("cutModeGroup");
-const cutOffsetControl = document.getElementById("cutOffsetControl");
-const cutOffsetValue = document.getElementById("cutOffsetValue");
-const cutOffsetUnit = document.getElementById("cutOffsetUnit");
+const cutOffsetSelect = document.getElementById("cutOffsetSelect");
 const beatEdit = document.getElementById("beatEdit");
 const overlayText = document.getElementById("overlayText");
 const previewOverlay = document.getElementById("previewOverlay");
@@ -131,6 +129,7 @@ function setVideo(file) {
   probe.preload = "metadata";
   probe.onloadedmetadata = () => {
     sourceDuration = Number.isFinite(probe.duration) ? probe.duration : 0;
+    updateCutOffsetOptions();
     URL.revokeObjectURL(metadataUrl);
     renderBtn.disabled = false;
     transcribeBtn.disabled = false;
@@ -159,41 +158,72 @@ function getTargetDuration() {
   return Math.min(requested, sourceDuration);
 }
 
-// 자동 길이에서만 자동 컷 기준을 적용하고 시작 위치를 계산합니다.
+// 자동 길이에서 선택한 시작 시점을 계산합니다.
 function getCutStart() {
   const target = getTargetDuration();
   const available = Math.max(0, sourceDuration - target);
   if (!available) return 0;
 
-  // 쇼츠 길이를 직접 지정한 경우에는 자동 컷 기준을 사용하지 않고 영상 처음부터 자릅니다.
+  // 쇼츠 길이를 직접 지정한 경우에는 처음부터 지정된 길이만 사용합니다.
   if (Number(durationSelect.value) !== 0) return 0;
 
-  if (cutModeSelect.value === "seconds") {
-    return Math.min(Math.max(0, Number(cutOffsetValue.value) || 0), available);
+  // 자동 컷에서 시간 선택을 했다면 선택한 시작 시점부터 자릅니다.
+  if (cutModeSelect.value === "manual") {
+    return Math.min(Number(cutOffsetSelect?.value) || 0, available);
   }
 
-  if (cutModeSelect.value === "minutes") {
-    const minutes = Math.max(0, Number(cutOffsetValue.value) || 0);
-    return Math.min(minutes * 60, available);
-  }
-
-  // 자동은 기존처럼 영상에서 가장 안정적인 가운데 구간을 선택합니다.
+  // 자동은 기존처럼 영상의 가운데 구간을 사용합니다.
   return available / 2;
 }
 
-// 쇼츠 길이가 자동일 때만 자동 컷 기준 설정을 보여줍니다.
+// 자동 쇼츠 길이에서 선택 가능한 시작 시점을 10초 단위로 만듭니다.
+function updateCutOffsetOptions() {
+  if (!cutOffsetSelect) return;
+
+  const target = getTargetDuration();
+  const maxStart = Math.max(0, sourceDuration - target);
+  const previous = Number(cutOffsetSelect.value) || 0;
+
+  cutOffsetSelect.innerHTML = "";
+  for (let seconds = 0; seconds <= maxStart; seconds += 10) {
+    const option = document.createElement("option");
+    option.value = String(seconds);
+    option.textContent = formatCutPosition(seconds) + "부터";
+    cutOffsetSelect.appendChild(option);
+  }
+
+  // 마지막 구간이 10초 단위에 맞지 않으면 실제 가능한 최대 위치도 추가합니다.
+  if (maxStart > 0 && maxStart % 10 !== 0) {
+    const option = document.createElement("option");
+    option.value = String(Math.floor(maxStart));
+    option.textContent = formatCutPosition(maxStart) + "부터";
+    cutOffsetSelect.appendChild(option);
+  }
+
+  const nextValue = Math.min(previous, maxStart);
+  cutOffsetSelect.value = String(nextValue);
+}
+
+// 컷 시작 시간을 00:00 형식으로 표시합니다.
+function formatCutPosition(seconds) {
+  const value = Math.max(0, Math.floor(Number(seconds) || 0));
+  const minutes = Math.floor(value / 60);
+  const remainSeconds = value % 60;
+  return String(minutes).padStart(2, "0") + ":" + String(remainSeconds).padStart(2, "0");
+}
+
+// 쇼츠 길이가 자동일 때만 자동 컷 설정을 보여줍니다.
 function updateCutModeVisibility() {
   const isAutoDuration = Number(durationSelect.value) === 0;
   if (cutModeGroup) cutModeGroup.hidden = !isAutoDuration;
 
   if (!isAutoDuration) {
-    if (cutOffsetControl) cutOffsetControl.hidden = true;
+    if (cutOffsetSelect) cutOffsetSelect.hidden = true;
     return;
   }
 
-  const usesOffset = cutModeSelect.value === "seconds" || cutModeSelect.value === "minutes";
-  if (cutOffsetControl) cutOffsetControl.hidden = !usesOffset;
-  if (cutOffsetUnit) cutOffsetUnit.textContent = cutModeSelect.value === "minutes" ? "분부터" : "초부터";
+  updateCutOffsetOptions();
+  if (cutOffsetSelect) cutOffsetSelect.hidden = cutModeSelect.value !== "manual";
 }
 
 // 영상 비율을 유지하면서 9:16으로 크롭합니다.
@@ -969,10 +999,6 @@ async function renderShorts() {
 // 쇼츠 길이와 자동 컷 기준을 변경할 때 표시 옵션을 갱신합니다.
 durationSelect.addEventListener("change", updateCutModeVisibility);
 cutModeSelect.addEventListener("change", updateCutModeVisibility);
-cutOffsetValue?.addEventListener("input", () => {
-  const value = Math.max(0, Number(cutOffsetValue.value) || 0);
-  cutOffsetValue.value = String(value);
-});
 updateCutModeVisibility();
 
 // 드래그 앤 드롭 입력을 처리합니다.
