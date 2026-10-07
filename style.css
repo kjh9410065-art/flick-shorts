@@ -366,3 +366,9 @@ footer { max-width:1180px; margin:auto; padding:28px 24px 45px; display:flex; ju
 .genre-chip{border:1px solid var(--line,#e9e7f2);background:#fff;border-radius:999px;padding:9px 13px;font:inherit;font-size:13px;cursor:pointer;transition:.18s}
 .genre-chip.active{background:#6d55e8;color:#fff;border-color:#6d55e8}
 .genre-chip:hover{transform:translateY(-1px)}
+
+/* 자동 길이에서 초·분 단위 컷 위치를 입력할 수 있게 합니다. */
+.cut-offset-control{display:flex;align-items:center;gap:7px;margin-top:7px}
+.cut-offset-control input{width:90px!important;padding:8px 10px!important}
+.cut-offset-control span{color:#7f8495;font-size:10px;font-weight:700;white-space:nowrap}
+#cutModeGroup[hidden]{display:none}
