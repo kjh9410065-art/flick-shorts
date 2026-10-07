@@ -1124,9 +1124,9 @@ function showLanding(pushHistory = true) {
 }
 
 
-// 상세 쇼츠 도구의 보조 인터랙션을 연결합니다.
-// 음악 생성기 UI 요소를 가져옵니다.
+// 음악 생성기 입력을 연결합니다.
 const musicPrompt = document.getElementById("musicPrompt");
+const musicGenre = document.getElementById("musicGenre");
 const musicVocal = document.getElementById("musicVocal");
 const musicPromptCount = document.getElementById("musicPromptCount");
 const musicLyrics = document.getElementById("musicLyrics");
@@ -1142,13 +1142,17 @@ const regenerateMusicBtn = document.getElementById("regenerateMusicBtn");
 const clearGeneratedMusicBtn = document.getElementById("clearGeneratedMusicBtn");
 const generateMusicBtn = document.getElementById("generateMusicBtn");
 
-// 선택값을 생성기 요약 영역에 반영합니다.
+// 선택된 장르와 보컬을 생성 준비 요약에 반영합니다.
 function updateMusicGeneratorSummary() {
+  const genreSummary = document.getElementById("musicGenreSummary");
   const vocalSummary = document.getElementById("musicVocalSummary");
-  if (vocalSummary) vocalSummary.textContent = musicVocal?.selectedOptions[0]?.textContent || "-";
+  const genres = [...document.querySelectorAll("#musicGenre .genre-chip.active")].map((chip) => chip.textContent.trim());
+  const vocal = document.querySelector("#musicVocal .genre-chip.active");
+  if (genreSummary) genreSummary.textContent = genres.length ? genres.join(" + ") : "선택 안 함";
+  if (vocalSummary) vocalSummary.textContent = vocal?.textContent || "Instrumental";
 }
 
-// 음악 생성 API를 연결할 독립 함수입니다. 현재는 실제 API를 임의로 호출하지 않습니다.
+// 음악 생성 API 연결 전까지 입력값만 검증합니다.
 async function generateMusic() {
   if (!musicPrompt?.value.trim()) {
     if (musicGeneratorStatus) musicGeneratorStatus.textContent = "프롬프트를 입력하세요";
@@ -1156,8 +1160,19 @@ async function generateMusic() {
     musicPrompt?.focus();
     return;
   }
-  if (musicGeneratorStatus) musicGeneratorStatus.textContent = musicVocal?.value === "vocal" && musicLyrics?.value.trim() ? "가사 포함 · API 연결 대기" : "API 연결 대기";
-  if (musicGeneratorResultText) musicGeneratorResultText.textContent = "현재 프로젝트에는 실제 음악 생성 API가 연결되어 있지 않습니다.";
+  const genres = [...document.querySelectorAll("#musicGenre .genre-chip.active")].map((chip) => chip.dataset.genre);
+  const vocal = document.querySelector("#musicVocal .genre-chip.active")?.dataset.vocal || "instrumental";
+  if (!genres.length) {
+    const firstGenre = document.querySelector("#musicGenre .genre-chip");
+    firstGenre?.classList.add("active");
+    updateMusicGeneratorSummary();
+    return;
+  }
+  const hasLyrics = Boolean(musicLyrics?.value.trim());
+  if (musicGeneratorStatus) musicGeneratorStatus.textContent = hasLyrics ? "가사 포함 · API 연결 대기" : "API 연결 대기";
+  if (musicGeneratorResultText) {
+    musicGeneratorResultText.textContent = `생성 API 연결 대기 · 장르: ${genres.join(", ")} · 보컬: ${vocal}`;
+  }
   setStatus("음악 생성 API 연결이 필요합니다.");
 }
 
@@ -1174,16 +1189,24 @@ function clearGeneratedMusic() {
   if (musicGeneratorStatus) musicGeneratorStatus.textContent = "프롬프트를 입력하세요";
 }
 
-// 음악 생성기 입력과 버튼을 연결합니다.
+// 음악 생성기 입력과 선택 UI를 연결합니다.
 musicLyrics?.addEventListener("input", () => {
   if (musicLyricsCount) musicLyricsCount.textContent = musicLyrics.value.length + " / 2000";
 });
-
 musicPrompt?.addEventListener("input", () => {
   if (musicPromptCount) musicPromptCount.textContent = musicPrompt.value.length + " / 500";
   if (musicGeneratorStatus) musicGeneratorStatus.textContent = musicPrompt.value.trim() ? "생성 가능" : "프롬프트를 입력하세요";
 });
-musicVocal?.addEventListener("change", updateMusicGeneratorSummary);
+document.querySelectorAll("#musicGenre .genre-chip").forEach((chip) => chip.addEventListener("click", () => {
+  chip.classList.toggle("active");
+  if (!document.querySelector("#musicGenre .genre-chip.active")) chip.classList.add("active");
+  updateMusicGeneratorSummary();
+}));
+document.querySelectorAll("#musicVocal .genre-chip").forEach((chip) => chip.addEventListener("click", () => {
+  document.querySelectorAll("#musicVocal .genre-chip").forEach((item) => item.classList.remove("active"));
+  chip.classList.add("active");
+  updateMusicGeneratorSummary();
+}));
 generateMusicBtn?.addEventListener("click", generateMusic);
 regenerateMusicBtn?.addEventListener("click", generateMusic);
 clearGeneratedMusicBtn?.addEventListener("click", clearGeneratedMusic);
