@@ -1127,6 +1127,7 @@ function showLanding(pushHistory = true) {
 // 음악 생성기 입력을 연결합니다.
 const musicPrompt = document.getElementById("musicPrompt");
 const musicGenre = document.getElementById("musicGenre");
+const musicCustomGenre = document.getElementById("musicCustomGenre");
 const musicVocal = document.getElementById("musicVocal");
 const musicPromptCount = document.getElementById("musicPromptCount");
 const musicLyrics = document.getElementById("musicLyrics");
@@ -1147,6 +1148,8 @@ function updateMusicGeneratorSummary() {
   const genreSummary = document.getElementById("musicGenreSummary");
   const vocalSummary = document.getElementById("musicVocalSummary");
   const genres = [...document.querySelectorAll("#musicGenre .genre-chip.active")].map((chip) => chip.textContent.trim());
+  const customGenre = musicCustomGenre?.value.trim();
+  if (customGenre) genres.push(customGenre);
   const vocal = document.querySelector("#musicVocal .genre-chip.active");
   if (genreSummary) genreSummary.textContent = genres.length ? genres.join(" + ") : "선택 안 함";
   if (vocalSummary) vocalSummary.textContent = vocal?.textContent || "Instrumental";
@@ -1161,6 +1164,8 @@ async function generateMusic() {
     return;
   }
   const genres = [...document.querySelectorAll("#musicGenre .genre-chip.active")].map((chip) => chip.dataset.genre);
+  const customGenre = musicCustomGenre?.value.trim();
+  if (customGenre) genres.push(customGenre);
   const vocal = document.querySelector("#musicVocal .genre-chip.active")?.dataset.vocal || "instrumental";
   if (!genres.length) {
     const firstGenre = document.querySelector("#musicGenre .genre-chip");
@@ -1193,6 +1198,7 @@ function clearGeneratedMusic() {
 musicLyrics?.addEventListener("input", () => {
   if (musicLyricsCount) musicLyricsCount.textContent = musicLyrics.value.length + " / 2000";
 });
+musicCustomGenre?.addEventListener("input", updateMusicGeneratorSummary);
 musicPrompt?.addEventListener("input", () => {
   if (musicPromptCount) musicPromptCount.textContent = musicPrompt.value.length + " / 500";
   if (musicGeneratorStatus) musicGeneratorStatus.textContent = musicPrompt.value.trim() ? "생성 가능" : "프롬프트를 입력하세요";
