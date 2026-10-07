@@ -374,10 +374,10 @@ footer { max-width:1180px; margin:auto; padding:28px 24px 45px; display:flex; ju
 #cutModeGroup[hidden]{display:none}
 
 /* 자동 컷 범위를 직접 지정하는 UI입니다. */
-.cut-check{display:flex;align-items:center;gap:8px;color:#555a6d;font-size:11px;font-weight:800}
+.cut-check{display:flex;align-items:center;gap:8px;position:absolute;top:0;right:0;color:#555a6d;font-size:11px;font-weight:800}
 .cut-check input{width:16px;height:16px;margin:0;accent-color:#7055ed}
-.cut-range-fields{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:-2px}
-.cut-range-field{display:flex;flex-direction:column;gap:6px}
+.cut-mode-group-placeholder{display:block}.cut-range-fields{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:0}
+.cut-range-field{display:flex;flex-direction:column;gap:7px}
 .cut-range-field span{color:#777c8d;font-size:11px;font-weight:800}
 .cut-range-field input{width:100%;padding:11px 12px;border:1px solid #e2e4eb;border-radius:10px;background:#fff;color:#252a3c;outline:none;font-size:14px;font-weight:700}
 .cut-range-field input:focus{border-color:#7055ed}
