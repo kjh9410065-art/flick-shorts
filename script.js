@@ -18,7 +18,8 @@ const durationSelect = document.getElementById("duration");
 const positionSelect = document.getElementById("position");
 const cutModeSelect = document.getElementById("cutMode");
 const cutModeGroup = document.getElementById("cutModeGroup");
-const cutOffsetSelect = document.getElementById("cutOffsetSelect");
+const cutStartInput = document.getElementById("cutStartInput");
+const cutEndInput = document.getElementById("cutEndInput");
 const beatEdit = document.getElementById("beatEdit");
 const overlayText = document.getElementById("overlayText");
 const previewOverlay = document.getElementById("previewOverlay");
@@ -129,7 +130,8 @@ function setVideo(file) {
   probe.preload = "metadata";
   probe.onloadedmetadata = () => {
     sourceDuration = Number.isFinite(probe.duration) ? probe.duration : 0;
-    updateCutOffsetOptions();
+    normalizeCutInput(cutStartInput);
+    normalizeCutInput(cutEndInput);
     URL.revokeObjectURL(metadataUrl);
     renderBtn.disabled = false;
     transcribeBtn.disabled = false;
@@ -158,72 +160,100 @@ function getTargetDuration() {
   return Math.min(requested, sourceDuration);
 }
 
-// 자동 길이에서 선택한 시작 시점을 계산합니다.
-function getCutStart() {
-  const target = getTargetDuration();
-  const available = Math.max(0, sourceDuration - target);
-  if (!available) return 0;
+// MM:SS 또는 SS 형식의 컷 위치를 초 단위로 변환합니다.
+function parseCutTime(value) {
+  const text = String(value || "").trim();
+  if (!text) return 0;
 
-  // 쇼츠 길이를 직접 지정한 경우에는 처음부터 지정된 길이만 사용합니다.
-  if (Number(durationSelect.value) !== 0) return 0;
-
-  // 자동 컷에서 시간 선택을 했다면 선택한 시작 시점부터 자릅니다.
-  if (cutModeSelect.value === "manual") {
-    return Math.min(Number(cutOffsetSelect?.value) || 0, available);
+  if (text.includes(":")) {
+    const parts = text.split(":").map((part) => Number(part));
+    if (parts.some((part) => !Number.isFinite(part))) return 0;
+    const minutes = Math.max(0, parts[0] || 0);
+    const seconds = Math.max(0, parts[1] || 0);
+    return minutes * 60 + seconds;
   }
 
-  // 자동은 기존처럼 영상의 가운데 구간을 사용합니다.
-  return available / 2;
+  return Math.max(0, Number(text) || 0);
 }
 
-// 자동 쇼츠 길이에서 선택 가능한 시작 시점을 10초 단위로 만듭니다.
-function updateCutOffsetOptions() {
-  if (!cutOffsetSelect) return;
-
-  const target = getTargetDuration();
-  const maxStart = Math.max(0, sourceDuration - target);
-  const previous = Number(cutOffsetSelect.value) || 0;
-
-  cutOffsetSelect.innerHTML = "";
-  for (let seconds = 0; seconds <= maxStart; seconds += 10) {
-    const option = document.createElement("option");
-    option.value = String(seconds);
-    option.textContent = formatCutPosition(seconds) + "부터";
-    cutOffsetSelect.appendChild(option);
-  }
-
-  // 마지막 구간이 10초 단위에 맞지 않으면 실제 가능한 최대 위치도 추가합니다.
-  if (maxStart > 0 && maxStart % 10 !== 0) {
-    const option = document.createElement("option");
-    option.value = String(Math.floor(maxStart));
-    option.textContent = formatCutPosition(maxStart) + "부터";
-    cutOffsetSelect.appendChild(option);
-  }
-
-  const nextValue = Math.min(previous, maxStart);
-  cutOffsetSelect.value = String(nextValue);
-}
-
-// 컷 시작 시간을 00:00 형식으로 표시합니다.
-function formatCutPosition(seconds) {
+// 컷 위치를 MM:SS 형식으로 정리합니다.
+function formatCutTime(seconds) {
   const value = Math.max(0, Math.floor(Number(seconds) || 0));
   const minutes = Math.floor(value / 60);
   const remainSeconds = value % 60;
   return String(minutes).padStart(2, "0") + ":" + String(remainSeconds).padStart(2, "0");
 }
 
-// 쇼츠 길이가 자동일 때만 자동 컷 설정을 보여줍니다.
+// 자동 컷을 사용할 때 실제 선택 가능한 범위를 계산합니다.
+function getCutRange() {
+  const videoEnd = Math.max(0, sourceDuration);
+  let start = parseCutTime(cutStartInput?.value);
+  let end = parseCutTime(cutEndInput?.value);
+
+  start = Math.min(Math.max(0, start), videoEnd);
+  end = Math.min(Math.max(0, end), videoEnd);
+
+  if (start >= end) return null;
+  return { start, end };
+}
+
+// 자동 길이에서 컷 시작 시점을 계산합니다.
+function getCutStart() {
+  const target = getEffectiveTargetDuration();
+  const available = Math.max(0, sourceDuration - target);
+  if (!available) return 0;
+
+  // 쇼츠 길이를 직접 지정한 경우 기존처럼 영상 처음부터 자릅니다.
+  if (Number(durationSelect.value) !== 0) return 0;
+
+  // 자동 컷을 사용하면 사용자가 지정한 범위 안에서 가운데 구간을 선택합니다.
+  if (cutModeSelect.checked) {
+    const range = getCutRange();
+    if (range) {
+      const rangeDuration = range.end - range.start;
+      if (rangeDuration <= target) return range.start;
+      return range.start + (rangeDuration - target) / 2;
+    }
+  }
+
+  // 자동 컷을 사용하지 않으면 기존처럼 영상 전체의 가운데 구간을 선택합니다.
+  return available / 2;
+}
+
+// 사용자가 지정한 자동 컷 범위가 목표 쇼츠 길이보다 짧으면 범위 길이에 맞춥니다.
+function getEffectiveTargetDuration() {
+  const target = getTargetDuration();
+
+  if (Number(durationSelect.value) !== 0 || !cutModeSelect.checked) return target;
+
+  const range = getCutRange();
+  if (!range) return target;
+
+  return Math.min(target, range.end - range.start);
+}
+
+// 자동 컷 설정을 현재 쇼츠 길이에 맞게 활성화합니다.
 function updateCutModeVisibility() {
   const isAutoDuration = Number(durationSelect.value) === 0;
   if (cutModeGroup) cutModeGroup.hidden = !isAutoDuration;
 
   if (!isAutoDuration) {
-    if (cutOffsetSelect) cutOffsetSelect.hidden = true;
+    if (cutModeSelect) cutModeSelect.checked = false;
+    if (cutStartInput) cutStartInput.disabled = true;
+    if (cutEndInput) cutEndInput.disabled = true;
     return;
   }
 
-  updateCutOffsetOptions();
-  if (cutOffsetSelect) cutOffsetSelect.hidden = cutModeSelect.value !== "manual";
+  const enabled = Boolean(cutModeSelect?.checked);
+  if (cutStartInput) cutStartInput.disabled = !enabled;
+  if (cutEndInput) cutEndInput.disabled = !enabled;
+}
+
+// 입력한 컷 위치를 MM:SS 형식으로 정리합니다.
+function normalizeCutInput(input) {
+  if (!input) return;
+  const seconds = Math.min(parseCutTime(input.value), Math.max(0, sourceDuration));
+  input.value = formatCutTime(seconds);
 }
 
 // 영상 비율을 유지하면서 9:16으로 크롭합니다.
@@ -293,7 +323,7 @@ async function loadWhisper() {
 
 // 현재 컷 구간의 오디오를 16kHz mono WAV로 추출합니다.
 async function extractSpeechAudio() {
-  const targetDuration = getTargetDuration();
+  const targetDuration = getEffectiveTargetDuration();
   const cutStart = getCutStart();
   await ffmpeg.writeFile("input.mp4", await fetchFile(videoFile));
   await ffmpeg.exec(["-ss", String(cutStart), "-t", String(targetDuration || 30), "-i", "input.mp4", "-vn", "-ac", "1", "-ar", "16000", "-c:a", "pcm_s16le", "-y", "speech.wav"]);
@@ -894,7 +924,7 @@ async function renderShorts() {
       beatSegments = await prepareBeatEdit();
     }
 
-    const targetDuration = getTargetDuration();
+    const targetDuration = getEffectiveTargetDuration();
     const cutStart = getCutStart();
     const text = overlayText.value.trim();
     const baseFilter = buildCropFilter();
@@ -999,6 +1029,14 @@ async function renderShorts() {
 // 쇼츠 길이와 자동 컷 기준을 변경할 때 표시 옵션을 갱신합니다.
 durationSelect.addEventListener("change", updateCutModeVisibility);
 cutModeSelect.addEventListener("change", updateCutModeVisibility);
+cutStartInput?.addEventListener("blur", () => normalizeCutInput(cutStartInput));
+cutEndInput?.addEventListener("blur", () => normalizeCutInput(cutEndInput));
+cutStartInput?.addEventListener("input", () => {
+  cutStartInput.value = cutStartInput.value.replace(/[^0-9:]/g, "");
+});
+cutEndInput?.addEventListener("input", () => {
+  cutEndInput.value = cutEndInput.value.replace(/[^0-9:]/g, "");
+});
 updateCutModeVisibility();
 
 // 드래그 앤 드롭 입력을 처리합니다.
