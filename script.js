@@ -1044,6 +1044,29 @@ function handleCutTimeKeydown(event) {
   const value = input.value || "00:00";
   const digitPositions = [0, 1, 3, 4];
 
+  // 00:00의 맨 앞에서 숫자를 입력하기 시작하면 4자리를 하나의 시간값으로 받아들입니다.
+  if (/^[0-9]$/.test(key) && input.dataset.maskTyping === "true") {
+    event.preventDefault();
+    const sequence = (input.dataset.maskSequence || "") + key;
+    input.dataset.maskSequence = sequence;
+
+    if (sequence.length >= 4) {
+      input.value = sequence.slice(0, 2) + ":" + sequence.slice(2, 4);
+      input.dataset.maskTyping = "false";
+      input.dataset.maskSequence = "";
+      input.setSelectionRange(5, 5);
+    }
+    return;
+  }
+
+  // 00:00의 맨 앞에서 첫 숫자를 입력하면 연속 4자리 입력 모드로 전환합니다.
+  if (/^[0-9]$/.test(key) && (input.selectionStart ?? 0) === 0 && (input.selectionEnd ?? 0) === 0) {
+    event.preventDefault();
+    input.dataset.maskTyping = "true";
+    input.dataset.maskSequence = key;
+    return;
+  }
+
   // 숫자를 입력하면 현재 커서 위치의 숫자를 덮어쓰고 다음 숫자 위치로 이동합니다.
   if (/^[0-9]$/.test(key)) {
     event.preventDefault();
@@ -1105,9 +1128,13 @@ cutEndInput?.addEventListener("input", () => handleCutTimeInput(cutEndInput));
 // 입력칸을 클릭하면 커서를 그대로 두어 원하는 자리에서 바로 덮어쓸 수 있게 합니다.
 cutStartInput?.addEventListener("focus", () => {
   if (!cutStartInput.value) cutStartInput.value = "00:00";
+  cutStartInput.dataset.maskTyping = "false";
+  cutStartInput.dataset.maskSequence = "";
 });
 cutEndInput?.addEventListener("focus", () => {
   if (!cutEndInput.value) cutEndInput.value = "00:00";
+  cutEndInput.dataset.maskTyping = "false";
+  cutEndInput.dataset.maskSequence = "";
 });
 
 updateCutModeVisibility();
