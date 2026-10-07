@@ -201,8 +201,7 @@ footer { max-width:1180px; margin:auto; padding:28px 24px 45px; display:flex; ju
 .extra-page-card .audio-row{margin-top:0}
 
 /* 자동생성 화면은 영상이 올라온 뒤에만 세부 설정을 보여줍니다. */
-.basic-options{display:none;margin-top:14px;padding:14px;border:1px solid #e7e8ef;border-radius:14px;background:#fafbfe}
-.editor-card.has-video .basic-options{display:block}
+.basic-options{display:block;margin-top:14px;padding:14px;border:1px solid #e7e8ef;border-radius:14px;background:#fafbfe}
 .basic-options-title{display:flex;align-items:center;justify-content:space-between;margin-bottom:10px;color:#303447;font-size:12px}
 .basic-options-title span{color:#969aaa;font-size:9px;font-weight:600}
 .editor-card:not(.has-video) .render-btn{margin-top:14px}
