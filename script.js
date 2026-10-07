@@ -146,7 +146,12 @@ function setVideo(file) {
 function getTargetDuration() {
   const requested = Number(durationSelect.value);
   if (!sourceDuration) return 0;
-  if (requested === 0) return Math.min(30, sourceDuration);
+  if (requested === 0) {
+    if (sourceDuration <= 15) return sourceDuration;
+    if (sourceDuration <= 30) return Math.min(30, sourceDuration);
+    if (sourceDuration <= 45) return Math.min(45, sourceDuration);
+    return Math.min(60, sourceDuration);
+  }
   return Math.min(requested, sourceDuration);
 }
 
