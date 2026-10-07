@@ -92,14 +92,20 @@
               </select>
             </div>
             <div class="control-group" id="cutModeGroup">
-              <label for="cutMode">자동 컷 기준</label>
-              <select id="cutMode">
-                <option value="auto" selected>자동</option>
-                <option value="manual">시간 선택</option>
-              </select>
-              <select id="cutOffsetSelect" class="cut-offset-select" aria-label="자동 컷 시작 위치" hidden>
-                <option value="0">00:00부터</option>
-              </select>
+              <label class="cut-check">
+                <input id="cutMode" type="checkbox" />
+                <span>자동 컷 사용</span>
+              </label>
+              <div class="cut-range-fields" id="cutRangeFields">
+                <label class="cut-range-field">
+                  <span>시작 위치</span>
+                  <input id="cutStartInput" type="text" inputmode="numeric" placeholder="00:00" value="00:00" maxlength="8" disabled />
+                </label>
+                <label class="cut-range-field">
+                  <span>마지막 위치</span>
+                  <input id="cutEndInput" type="text" inputmode="numeric" placeholder="00:00" value="00:00" maxlength="8" disabled />
+                </label>
+              </div>
             </div>
             <div class="control-group">
               <label for="overlayText">화면 문구 <span class="optional-label">선택</span></label>
