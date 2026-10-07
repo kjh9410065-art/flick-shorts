@@ -20,8 +20,6 @@ const cutModeSelect = document.getElementById("cutMode");
 const beatEdit = document.getElementById("beatEdit");
 const overlayText = document.getElementById("overlayText");
 const previewOverlay = document.getElementById("previewOverlay");
-const audioName = document.getElementById("audioName");
-const clearAudio = document.getElementById("clearAudio");
 const removeVideo = document.getElementById("removeVideo");
 const dropzone = document.getElementById("dropzone");
 const status = document.getElementById("status");
@@ -946,7 +944,7 @@ dropzone.addEventListener("drop", (event) => {
 
 // 파일 입력 이벤트를 연결합니다.
 videoInput.addEventListener("change", () => setVideo(videoInput.files[0]));
-audioInput.addEventListener("change", () => setAudio(audioInput.files[0]));
+audioInput?.addEventListener("change", () => setAudio(audioInput.files[0]));
 overlayText.addEventListener("input", updateOverlay);
 transcribeBtn.addEventListener("click", generateSubtitles);
 generateVoiceBtn.addEventListener("click", generateVoice);
@@ -1008,7 +1006,8 @@ function setAudio(file) {
     return;
   }
   audioFile = file;
-  audioName.textContent = file.name;
+  const audioName = document.getElementById("audioName");
+  if (audioName) audioName.textContent = file.name;
   const meta = document.getElementById("audioMeta");
   const preview = document.getElementById("musicPreview");
   const beatName = document.getElementById("beatMusicName");
@@ -1026,22 +1025,7 @@ function setAudio(file) {
 }
 
 
-clearAudio.addEventListener("click", () => {
-  audioFile = null;
-  audioInput.value = "";
-  audioName.textContent = "선택하지 않음";
-  const meta = document.getElementById("audioMeta");
-  const preview = document.getElementById("musicPreview");
-  const beatName = document.getElementById("beatMusicName");
-  const resultText = document.getElementById("musicResultText");
-  if (meta) meta.textContent = "음악 파일을 선택하면 정보가 표시됩니다.";
-  if (beatName) beatName.textContent = "현재 선택된 음악 사용";
-  if (resultText) resultText.textContent = "음악 파일을 선택하면 미리듣기와 파일 정보가 표시됩니다.";
-  if (preview.dataset.objectUrl) URL.revokeObjectURL(preview.dataset.objectUrl);
-  preview.removeAttribute("src");
-  preview.hidden = true;
-  clearAudio.hidden = true;
-});
+
 
 // 영상을 제거합니다.
 removeVideo.addEventListener("click", () => {
@@ -1233,13 +1217,7 @@ document.getElementById("originalVolume")?.addEventListener("input", (event) => 
   const output = document.getElementById("originalVolumeValue");
   if (output) output.textContent = Math.round(Number(event.target.value) * 100) + "%";
 });
-document.getElementById("applyMusicBtn")?.addEventListener("click", () => {
-  if (!audioFile) {
-    setStatus("먼저 사용할 음악 파일을 선택해주세요.");
-    return;
-  }
-  setStatus("기존 음악이 선택되었습니다. 쇼츠 자동생성에서 바로 사용할 수 있습니다.");
-});
+
 
 document.getElementById("runBeatEditBtn")?.addEventListener("click", async () => {
   if (!videoFile) {
