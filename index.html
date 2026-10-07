@@ -91,14 +91,17 @@
                 <option value="60">60초</option>
               </select>
             </div>
-            <div class="control-group">
-              <label for="cutMode">자동 컷</label>
+            <div class="control-group" id="cutModeGroup">
+              <label for="cutMode">자동 컷 기준</label>
               <select id="cutMode">
-                <option value="smart" selected>자동 구간 선택</option>
-                <option value="start">처음부터</option>
-                <option value="center">가운데 구간</option>
-                <option value="end">마지막 구간</option>
+                <option value="auto" selected>자동</option>
+                <option value="seconds">초 단위</option>
+                <option value="minutes">분 단위</option>
               </select>
+              <div class="cut-offset-control" id="cutOffsetControl" hidden>
+                <input id="cutOffsetValue" type="number" min="0" step="1" value="0" inputmode="numeric" aria-label="자동 컷 시작 위치" />
+                <span id="cutOffsetUnit">초부터</span>
+              </div>
             </div>
             <div class="control-group">
               <label for="overlayText">화면 문구 <span class="optional-label">선택</span></label>
