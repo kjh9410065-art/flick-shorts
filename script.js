@@ -1037,12 +1037,35 @@ durationSelect.addEventListener("change", updateCutModeVisibility);
 cutModeSelect.addEventListener("change", updateCutModeVisibility);
 cutStartInput?.addEventListener("blur", () => normalizeCutInput(cutStartInput));
 cutEndInput?.addEventListener("blur", () => normalizeCutInput(cutEndInput));
-cutStartInput?.addEventListener("input", () => {
-  cutStartInput.value = cutStartInput.value.replace(/[^0-9:]/g, "");
-});
-cutEndInput?.addEventListener("input", () => {
-  cutEndInput.value = cutEndInput.value.replace(/[^0-9:]/g, "");
-});
+// 시간 입력은 숫자 4자리만 입력하면 MM:SS 형태로 자동 표시합니다.
+function handleCutTimeInput(input) {
+  if (!input) return;
+
+  const digits = input.value.replace(/\\D/g, "").slice(0, 4);
+  if (!digits) {
+    input.value = "";
+    return;
+  }
+
+  if (digits.length <= 2) {
+    input.value = digits;
+  } else {
+    input.value = digits.slice(0, 2) + ":" + digits.slice(2);
+  }
+
+  // 숫자 4자리를 입력하면 자동으로 MM:SS 형태가 완성됩니다.
+  if (digits.length === 4) {
+    input.value = digits.slice(0, 2) + ":" + digits.slice(2);
+    input.setSelectionRange(input.value.length, input.value.length);
+  }
+}
+
+cutStartInput?.addEventListener("input", () => handleCutTimeInput(cutStartInput));
+cutEndInput?.addEventListener("input", () => handleCutTimeInput(cutEndInput));
+
+// 입력칸을 클릭하면 기존 시간을 한 번에 바꿀 수 있도록 전체를 선택합니다.
+cutStartInput?.addEventListener("focus", () => cutStartInput.select());
+cutEndInput?.addEventListener("focus", () => cutEndInput.select());
 updateCutModeVisibility();
 
 // 드래그 앤 드롭 입력을 처리합니다.
