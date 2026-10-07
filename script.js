@@ -1251,11 +1251,13 @@ function openEditor(pushHistory = true) {
   const hero = document.querySelector(".hero");
   const editor = document.querySelector("#editor");
   const roadmap = document.querySelector("#roadmap");
+  const features = document.querySelector("#features");
   const nav = document.querySelector("#siteNav");
   const tabs = document.querySelector("#appTabs");
   if (!editor) return;
   hero?.classList.add("page-hidden");
   if (roadmap) roadmap.hidden = true;
+  if (features) features.hidden = true;
   if (nav) nav.classList.add("visible");
   if (tabs) tabs.hidden = false;
   document.body.classList.add("editor-open");
@@ -1268,12 +1270,14 @@ function showLanding(pushHistory = true) {
   const editor = document.querySelector("#editor");
   const extra = document.querySelector("#extraFeaturesPage");
   const roadmap = document.querySelector("#roadmap");
+  const features = document.querySelector("#features");
   const nav = document.querySelector("#siteNav");
   const tabs = document.querySelector("#appTabs");
   hero?.classList.remove("page-hidden");
   if (editor) editor.hidden = true;
   if (extra) extra.hidden = true;
   if (roadmap) roadmap.hidden = true;
+  if (features) features.hidden = false;
   if (tabs) tabs.hidden = true;
   nav?.classList.remove("visible");
   document.body.classList.remove("editor-open");
