@@ -1079,7 +1079,7 @@ function handleCutTimeKeydown(event) {
 
 function handleCutTimeInput(input) {
   if (!input) return;
-  const digits = input.value.replace(/\\D/g, "").slice(0, 4);
+  const digits = input.value.replace(/\D/g, "").slice(0, 4);
   if (!digits) return;
 
   const padded = (digits + "0000").slice(0, 4);
