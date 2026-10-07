@@ -252,7 +252,13 @@ function updateCutModeVisibility() {
 // 입력한 컷 위치를 MM:SS 형식으로 정리합니다.
 function normalizeCutInput(input) {
   if (!input) return;
-  const seconds = Math.min(parseCutTime(input.value), Math.max(0, sourceDuration));
+  let seconds = parseCutTime(input.value);
+
+  // 영상 길이를 아직 읽지 못한 상태에서는 사용자가 입력한 값을 00:00으로 덮어쓰지 않습니다.
+  if (sourceDuration > 0) {
+    seconds = Math.min(seconds, sourceDuration);
+  }
+
   input.value = formatCutTime(seconds);
 }
 
