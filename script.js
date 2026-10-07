@@ -1037,78 +1037,42 @@ durationSelect.addEventListener("change", updateCutModeVisibility);
 cutModeSelect.addEventListener("change", updateCutModeVisibility);
 cutStartInput?.addEventListener("blur", () => normalizeCutInput(cutStartInput));
 cutEndInput?.addEventListener("blur", () => normalizeCutInput(cutEndInput));
-// 시간 입력은 00:00 고정 마스크처럼 동작하도록 처리합니다.
+// 시간 입력은 숫자를 왼쪽부터 누적해 MM:SS 마스크로 표시합니다.
 function handleCutTimeKeydown(event) {
   const input = event.currentTarget;
   const key = event.key;
-  const value = input.value || "00:00";
-  const digitPositions = [0, 1, 3, 4];
 
-  // 00:00의 맨 앞에서 숫자를 입력하기 시작하면 4자리를 하나의 시간값으로 받아들입니다.
-  if (/^[0-9]$/.test(key) && input.dataset.maskTyping === "true") {
-    event.preventDefault();
-    const sequence = (input.dataset.maskSequence || "") + key;
-    input.dataset.maskSequence = sequence;
-
-    if (sequence.length >= 4) {
-      input.value = sequence.slice(0, 2) + ":" + sequence.slice(2, 4);
-      input.dataset.maskTyping = "false";
-      input.dataset.maskSequence = "";
-      input.setSelectionRange(5, 5);
-    }
-    return;
-  }
-
-  // 00:00의 맨 앞에서 첫 숫자를 입력하면 연속 4자리 입력 모드로 전환합니다.
-  if (/^[0-9]$/.test(key) && (input.selectionStart ?? 0) === 0 && (input.selectionEnd ?? 0) === 0) {
-    event.preventDefault();
-    input.dataset.maskTyping = "true";
-    input.dataset.maskSequence = key;
-    return;
-  }
-
-  // 숫자를 입력하면 현재 커서 위치의 숫자를 덮어쓰고 다음 숫자 위치로 이동합니다.
   if (/^[0-9]$/.test(key)) {
     event.preventDefault();
 
+    // 맨 앞에서 입력을 시작하면 1→10:00, 12→12:00, 123→12:30, 1234→12:34 순서로 표시합니다.
+    if ((input.selectionStart ?? 0) === 0 && (input.selectionEnd ?? 0) === 0) {
+      const sequence = ((input.dataset.maskSequence || "") + key).slice(-4);
+      input.dataset.maskSequence = sequence;
+
+      const padded = (sequence + "0000").slice(0, 4);
+      input.value = padded.slice(0, 2) + ":" + padded.slice(2);
+      input.setSelectionRange(0, 0);
+      return;
+    }
+
+    // 다른 위치에서는 해당 숫자 자리를 덮어씁니다.
+    const positions = [0, 1, 3, 4];
     let position = input.selectionStart ?? 0;
     if (position === 2) position = 3;
 
-    let index = digitPositions.findIndex((item) => item >= position);
-    if (index < 0) index = digitPositions.length - 1;
+    let index = positions.findIndex((item) => item >= position);
+    if (index < 0) index = positions.length - 1;
 
-    const chars = value.padEnd(5, "0").slice(0, 5).split("");
-    chars[digitPositions[index]] = key;
+    const chars = (input.value || "00:00").padEnd(5, "0").slice(0, 5).split("");
+    chars[positions[index]] = key;
     input.value = chars.join("");
-
-    const nextPosition = index < digitPositions.length - 1 ? digitPositions[index + 1] : 5;
-    input.setSelectionRange(nextPosition, nextPosition);
-    input.dispatchEvent(new Event("input", { bubbles: true }));
-    return;
+    input.setSelectionRange(index < positions.length - 1 ? positions[index + 1] : 5, index < positions.length - 1 ? positions[index + 1] : 5);
+    input.dataset.maskSequence = "";
   }
 
-  // 콜론 위치에서는 커서가 콜론 뒤로 자연스럽게 넘어갑니다.
-  if (key === "ArrowLeft" || key === "ArrowRight") return;
-
-  if (key === "Backspace") {
-    event.preventDefault();
-    let position = input.selectionStart ?? 0;
-    if (position === 2) position = 1;
-
-    const index = [...digitPositions].reverse().findIndex((item) => item < position);
-    if (index >= 0) {
-      const actualIndex = digitPositions.length - 1 - index;
-      const chars = value.padEnd(5, "0").slice(0, 5).split("");
-      chars[digitPositions[actualIndex]] = "0";
-      input.value = chars.join("");
-      input.setSelectionRange(digitPositions[actualIndex], digitPositions[actualIndex]);
-      input.dispatchEvent(new Event("input", { bubbles: true }));
-    }
-    return;
-  }
-
-  // 콜론은 사용자가 삭제하거나 입력할 수 없게 고정합니다.
-  if (key === ":" || key.length === 1 && !/[0-9]/.test(key)) {
+  // 콜론은 고정되어 있어 직접 입력하거나 삭제할 수 없습니다.
+  if (key === ":" || (key.length === 1 && !/[0-9]/.test(key))) {
     event.preventDefault();
   }
 }
@@ -1116,6 +1080,8 @@ function handleCutTimeKeydown(event) {
 function handleCutTimeInput(input) {
   if (!input) return;
   const digits = input.value.replace(/\\D/g, "").slice(0, 4);
+  if (!digits) return;
+
   const padded = (digits + "0000").slice(0, 4);
   input.value = padded.slice(0, 2) + ":" + padded.slice(2);
 }
@@ -1125,16 +1091,15 @@ cutEndInput?.addEventListener("keydown", handleCutTimeKeydown);
 cutStartInput?.addEventListener("input", () => handleCutTimeInput(cutStartInput));
 cutEndInput?.addEventListener("input", () => handleCutTimeInput(cutEndInput));
 
-// 입력칸을 클릭하면 커서를 그대로 두어 원하는 자리에서 바로 덮어쓸 수 있게 합니다.
 cutStartInput?.addEventListener("focus", () => {
   if (!cutStartInput.value) cutStartInput.value = "00:00";
-  cutStartInput.dataset.maskTyping = "false";
   cutStartInput.dataset.maskSequence = "";
+  cutStartInput.setSelectionRange(0, 0);
 });
 cutEndInput?.addEventListener("focus", () => {
   if (!cutEndInput.value) cutEndInput.value = "00:00";
-  cutEndInput.dataset.maskTyping = "false";
   cutEndInput.dataset.maskSequence = "";
+  cutEndInput.setSelectionRange(0, 0);
 });
 
 updateCutModeVisibility();
