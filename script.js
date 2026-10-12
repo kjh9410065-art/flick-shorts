@@ -2,7 +2,7 @@
 // FFmpeg는 영상 렌더링에, Transformers.js의 Whisper는 STT 자동 자막에 사용합니다.
 // Web Audio API는 음악의 에너지 피크를 분석해 비트 기반 컷 지점을 계산합니다.
 
-import { FFmpeg } from "https://cdn.jsdelivr.net/npm/@ffmpeg/ffmpeg@0.12.10/dist/esm/index.js";
+import { FFmpeg } from "./vendor/ffmpeg/index.js";
 import { fetchFile, toBlobURL } from "https://cdn.jsdelivr.net/npm/@ffmpeg/util@0.12.1/dist/esm/index.js";
 
 const videoInput = document.getElementById("videoInput");
@@ -76,6 +76,9 @@ let audioFile = null;
 let videoObjectUrl = null;
 let outputObjectUrl = null;
 let ffmpegLoaded = false;
+let ffmpegLoading = null;
+let isRendering = false;
+let isTranscribing = false;
 let sourceDuration = 0;
 let progressListenerAttached = false;
 let transcriber = null;
@@ -102,10 +105,13 @@ function formatBytes(bytes) {
 
 // 영상 파일을 선택하고 메타데이터를 읽습니다.
 function setVideo(file) {
+  if(isRendering || isTranscribing)return;
   if (!file || !file.type.startsWith("video/")) {
     setStatus("영상 파일만 선택할 수 있습니다.");
     return;
   }
+
+  renderBtn.disabled=true;transcribeBtn.disabled=true;sourceDuration=0;
 
   videoFile = file;
   document.querySelector(".editor-card")?.classList.add("has-video");
@@ -129,6 +135,7 @@ function setVideo(file) {
   const metadataUrl = URL.createObjectURL(file);
   probe.preload = "metadata";
   probe.onloadedmetadata = () => {
+    if(videoFile!==file){URL.revokeObjectURL(metadataUrl);return;}
     sourceDuration = Number.isFinite(probe.duration) ? probe.duration : 0;
     normalizeCutInput(cutStartInput);
     normalizeCutInput(cutEndInput);
@@ -138,10 +145,11 @@ function setVideo(file) {
     setStatus("영상이 준비되었습니다. 쇼츠 만들기를 눌러 자동 생성하세요.");
   };
   probe.onerror = () => {
+    if(videoFile!==file){URL.revokeObjectURL(metadataUrl);return;}
     URL.revokeObjectURL(metadataUrl);
-    renderBtn.disabled = false;
-    transcribeBtn.disabled = false;
-    setStatus("영상이 준비되었습니다. 쇼츠 만들기를 눌러 자동 생성하세요.");
+    renderBtn.disabled = true;
+    transcribeBtn.disabled = true;
+    setStatus("영상 정보를 읽을 수 없습니다. 다른 영상 파일을 선택해주세요.");
   };
   probe.src = metadataUrl;
   updateOverlay();
@@ -282,11 +290,14 @@ async function loadFFmpeg() {
   if (ffmpegLoaded) return;
   setProgress(8, "영상 편집 엔진을 불러오는 중...");
   const baseURL = "https://cdn.jsdelivr.net/npm/@ffmpeg/core@0.12.6/dist/esm";
-  await ffmpeg.load({
-    coreURL: await toBlobURL(`${baseURL}/ffmpeg-core.js`, "text/javascript"),
-    wasmURL: await toBlobURL(`${baseURL}/ffmpeg-core.wasm`, "application/wasm"),
-  });
-  ffmpegLoaded = true;
+  // 한 개의 로딩 작업만 공유하고 실패하면 다음 클릭에서 다시 시도합니다.
+  if(!ffmpegLoading)ffmpegLoading=(async()=>{
+    const coreURL=await toBlobURL(`${baseURL}/ffmpeg-core.js`,"text/javascript");
+    let wasmURL;
+    try{wasmURL=await toBlobURL(`${baseURL}/ffmpeg-core.wasm`,"application/wasm");await ffmpeg.load({coreURL,wasmURL});ffmpegLoaded=true;}
+    finally{URL.revokeObjectURL(coreURL);if(wasmURL)URL.revokeObjectURL(wasmURL);}
+  })().finally(()=>{ffmpegLoading=null;});
+  await ffmpegLoading;
 }
 
 // FFmpeg 진행률 이벤트를 한 번만 연결합니다.
@@ -370,7 +381,8 @@ function escapeHtml(text) {
 
 // 선택한 영상의 음성을 Whisper로 분석합니다.
 async function generateSubtitles(options = {}) {
-  if (!videoFile) return;
+  if (!videoFile || isTranscribing || (isRendering && !options.silent)) return;
+  isTranscribing=true;
   const silent = Boolean(options.silent);
   transcribeBtn.disabled = true;
   renderBtn.disabled = true;
@@ -419,8 +431,9 @@ async function generateSubtitles(options = {}) {
     }
     if (silent) subtitleSegments = [];
   } finally {
-    transcribeBtn.disabled = !videoFile;
-    renderBtn.disabled = !videoFile;
+    isTranscribing=false;
+    transcribeBtn.disabled = isRendering || !videoFile;
+    renderBtn.disabled = isRendering || !videoFile;
   }
 }
 
@@ -893,7 +906,9 @@ function clearGeneratedAiVideo() {
 
 // FFmpeg로 최종 쇼츠를 렌더링합니다.
 async function renderShorts() {
-  if (!videoFile) return;
+  if (!videoFile || isRendering || isTranscribing || sourceDuration<=0) return;
+  isRendering=true;
+  videoInput.disabled=true;audioInput.disabled=true;removeVideo.disabled=true;
 
   renderBtn.disabled = true;
   transcribeBtn.disabled = true;
@@ -955,11 +970,11 @@ async function renderShorts() {
       if (subtitleSegments.length) {
         await ensureSubtitleFont();
         const subtitleChain = buildSubtitleFilters();
-        filters.push(`${current}${subtitleChain ? "," + subtitleChain : ""}[finalv]`);
+        filters.push(`${current}${subtitleChain}[finalv]`);
         current = "[finalv]";
       }
 
-      args = ["-i", "input.mp4", "-filter_complex", filters.join(";"), "-map", current, "-c:v", "libx264", "-preset", "veryfast", "-pix_fmt", "yuv420p"];
+      args = ["-i", "input.mp4", "-filter_complex", filters.join(";"), "-c:v", "libx264", "-preset", "veryfast", "-pix_fmt", "yuv420p"];
     } else {
       const filters = [baseFilter];
       if (text) {
@@ -1004,7 +1019,16 @@ async function renderShorts() {
     args.push("-movflags", "+faststart", "-y", "output.mp4");
 
     setProgress(25, beatSegments.length > 1 ? "음악에 맞춰 영상을 편집하는 중..." : "9:16 세로 영상으로 변환하고 렌더링하는 중...");
-    await ffmpeg.exec(args);
+    // 추가 오디오 입력은 모든 출력 옵션 앞에 위치해야 합니다.
+    const extraInputs=[];
+    for(let i=args.indexOf("input.mp4")+1;i<args.length;){
+      if(args[i]==="-stream_loop"){extraInputs.push(...args.splice(i,4));}
+      else if(args[i]==="-i"){extraInputs.push(...args.splice(i,2));}
+      else i++;
+    }
+    args.splice(args.indexOf("input.mp4")+1,0,...extraInputs);
+    const exitCode=await ffmpeg.exec(args);
+    if(exitCode!==0)throw new Error(`영상 변환 실패 (${exitCode})`);
 
     setProgress(96, "완성 파일을 준비하는 중...");
     const data = await ffmpeg.readFile("output.mp4");
@@ -1026,6 +1050,8 @@ async function renderShorts() {
     setStatus(beatEdit.checked ? "비트 분석 또는 렌더링에 실패했습니다. 음악 파일 형식과 브라우저 메모리를 확인해주세요." : "렌더링에 실패했습니다. 브라우저 메모리나 입력 파일 형식을 확인해주세요.");
     setProgress(0, "렌더링 실패");
   } finally {
+    isRendering=false;
+    videoInput.disabled=false;audioInput.disabled=false;removeVideo.disabled=false;
     renderBtn.disabled = !videoFile;
     transcribeBtn.disabled = !videoFile;
     generateVoiceBtn.disabled = false;
@@ -1203,6 +1229,10 @@ function setAudio(file) {
 
 // 영상을 제거합니다.
 removeVideo.addEventListener("click", () => {
+  if(isRendering||isTranscribing)return;
+  if(videoObjectUrl){URL.revokeObjectURL(videoObjectUrl);videoObjectUrl=null;}
+  if(outputObjectUrl){URL.revokeObjectURL(outputObjectUrl);outputObjectUrl=null;}
+  downloadBtn.hidden=true;
   videoFile = null;
   document.querySelector(".editor-card")?.classList.remove("has-video");
   document.querySelector(".preview-head b")?.replaceChildren(document.createTextNode("미리보기"));
